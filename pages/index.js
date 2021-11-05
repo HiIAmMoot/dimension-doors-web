@@ -2,6 +2,58 @@ import Head from 'next/head'
 import Header from '@components/Header'
 import Footer from '@components/Footer'
 import NavBar from '@components/NavBar'
+
+import { useState } from "react";
+//import { ethers } from "ethers";
+//import Web3Modal from "web3modal";
+
+// Reference to deployed contract
+// NOTE: having issues? make sure you deployed your contract and make sure to
+// check the network you are on.
+//import { contractAddr } from "../config";
+//import DimensionDoors from "../artifacts/contracts/ProbablyNothing.sol/MyToken.json";
+/*
+export default function Home() {
+  const [errorMsg, setErrorMsg] = useState(undefined);
+  // Capture form state
+  const [mintForm, updateMintForm] = useState({
+    price: "",
+    numToMint: "1",
+  });
+
+  // web modal helper.
+  // TODO: config cache
+  async function getProvider() {
+    const web3Modal = new Web3Modal({});
+    const connection = await web3Modal.connect();
+    return new ethers.providers.Web3Provider(connection);
+  }
+
+  async function mint() {
+    const { numToMint } = mintForm;
+    const provider = await getProvider();
+    const { name } = await provider.getNetwork();
+    if (name !== "rinkeby") {
+      setErrorMsg(`You are on the wrong network: ${name}`);
+      return;
+    }
+    const contract = new ethers.Contract(
+      contractAddr,
+      MyToken.abi,
+      provider.getSigner()
+    );
+
+    const price_ = await contract.price();
+    const price = ethers.utils.formatUnits(`${price_.mul(numToMint)}`, "wei");
+    try {
+      const token = await contract.mint(amount, { value: price });
+      await token.wait();
+    } catch (error) {
+      setErrorMsg(error.message);
+      console.log(error.message);
+    }
+  }
+*/
 /*
 import { createTheme, ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import {Typography} from '@material-ui/core'; 
@@ -71,7 +123,7 @@ export default function Home() {
       <div class="wrapper">
 
         <div class="md:flex space-x-16 mt-5 md:mr-0 mr-10">
-          <div class="md:flex items-center pl-128 pr-128">
+          <div class="md:flex items-center pl-4 pr-4 md:pl-12 md:pr-12 xl:pl-128 xl:pr-128">
             <div class="styles_container__16cxk ">
               <video class="styles_video__32uJf" playsinline="true" loop="true" controls={false} src="https://ipfs.io/ipfs/bafybeif6ln7uwezeqkeba7cdnraqqcvxa4jtxdqerml5mjhbcf7fmaahhq/S_Transition.mp4" autoplay="true"> </video>
             </div>
@@ -79,7 +131,7 @@ export default function Home() {
         </div>
 
 
-        <div class="md:flex space-x-16 mt-5 md:mr-0 mr-10 pl-80 pr-80">
+        <div class="md:flex space-x-16 mt-5 md:mr-0 mr-10 pl-2 pr-2 md:pl-10 md:pr-10 xl:pl-80 xl:pr-80">
             <div class="md:flex items-center">
               <div class="">
                 <h1 class="text-mainColor lg:text-5xl  font-bold leading-tight text-3xl">Dimension Doors</h1>
