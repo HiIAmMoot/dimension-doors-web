@@ -22,7 +22,7 @@ import ClosedPanel from '@components/ClosedPanel';
 export async function getStaticProps(context) {
 
   function getClosedURI() {
-    return "https://ipfs.io/ipfs/QmREEqJWVktXptuKZH1G1Ssc6WpLjB8fiqsaQhAuGJdzDS/";
+    return "https://ipfs.io/ipfs/QmeqMKPQHxCX7aYv4QKgPEMdKBmREe2LTfq8CBvH4hSy5y/";
   }
 
   async function getClosedMetadata(tokenId) {
@@ -52,7 +52,7 @@ export async function getStaticProps(context) {
   }
 
   function getOpenedURI() {
-    return "https://ipfs.io/ipfs/QmXsKaihet58s7W1Q1PS5Y7MvewHo5D1wagwHXV7ATqJ5v/";
+    return "https://ipfs.io/ipfs/QmRtkfhtBKNaVr3qJ8sABuBaviZCCFpPtvkJLe5QYxnWPn/";
   }
 
   async function getOpenedMetadata(tokenId) {
