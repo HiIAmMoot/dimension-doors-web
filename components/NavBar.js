@@ -44,7 +44,7 @@ const styles = makeStyles({
 const NavBar = () => {
     return (
     
-    <nav id="nav" className="navbar sticky-top w-full">
+    <nav id="nav" className="navbar sticky-top w-full z-10">
         <div className="bg-black">
             <div className="mx-auto px-4">
                 <div className="flex items-center justify-between py-4">

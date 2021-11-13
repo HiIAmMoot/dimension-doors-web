@@ -15,6 +15,7 @@ module.exports = {
       textColor: '#f4e6d4',
       gray: colors.coolGray,
       blue: colors.sky,
+      lightBlue: colors.cyan,
       red: colors.rose,
       pink: colors.fuchsia,
       green: colors.green,

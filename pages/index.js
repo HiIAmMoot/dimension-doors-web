@@ -55,7 +55,7 @@ export async function getStaticProps(context) {
     return "https://ipfs.io/ipfs/QmRtkfhtBKNaVr3qJ8sABuBaviZCCFpPtvkJLe5QYxnWPn/";
   }
 
-  async function getOpenedMetadata(tokenId) {
+  async function getOpenMetadata(tokenId) {
     let status;
     return fetch(getOpenedURI().concat(tokenId.toString()))
     .then((res) => { 
@@ -76,11 +76,11 @@ export async function getStaticProps(context) {
 
 
   async function getOpenedImage(tokenId) {
-    const meta = await getOpenedMetadata(tokenId);
+    const meta = await getopenMetadata(tokenId);
     return meta.image;
   }
 
-  const currentBatch = 1;
+  var currentBatch = 1;
   const closedTokenSupply = 4 + 10 * currentBatch;
   const openTokenSupply = currentBatch * 60;
 
@@ -89,6 +89,15 @@ export async function getStaticProps(context) {
     var meta = {};
     for (let i = 0; i < closedTokenSupply; i++) {
       meta[i] = await getClosedMetadata(i);
+    }
+    return meta;
+  }
+
+  async function buildOpenMeta(){
+    console.log('Start')
+    var meta = {};
+    for (let i = 0; i < openTokenSupply; i++) {
+      meta[i] = await getOpenMetadata(i);
     }
     return meta;
   }
@@ -130,12 +139,12 @@ export async function getStaticProps(context) {
 
   const closedMeta = await buildClosedMeta();
 
-  var openMeta = {};
+  const openMeta = await buildOpenMeta();
 
 
 
   return {
-    props: {closedMeta, openMeta}, // will be passed to the page component as props
+    props: {closedMeta, openMeta, currentBatch}, // will be passed to the page component as props
   }
 }
 
@@ -198,7 +207,7 @@ const styles = makeStyles({
   },
 })
 */
-export default function Home({closedMeta, openMeta}) {
+export default function Home({closedMeta, openMeta, currentBatch}) {
   //const classNamees = styles(); 
 
   var selectedClosedTokens = [];
@@ -284,9 +293,9 @@ export default function Home({closedMeta, openMeta}) {
 
         <div className="pl-80 pr-80"><div className="border-top"></div></div>
 
-        <div class="container max-w-full mx-auto py-24 px-6">
+        <div class="max-w-full mx-auto py-24 px-6">
             <h1 class="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
-                KEYS
+                BUY KEYS
             </h1>
             <p class="text-center text-lg text-textColor mt-2 px-6">
                 Keys are used to unlock doors, if you don't have the right key for the class, you can't use it.
@@ -295,57 +304,218 @@ export default function Home({closedMeta, openMeta}) {
 
             <div class="max-w-full md:max-w-6xl mx-auto my-3 md:px-8">
                 <div class="relative flex flex-col md:flex-row items-center">
-
-                  <ClosedPanel meta={closedMeta[0]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[1]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[2]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[3]}></ClosedPanel>
+                  <ClosedPanel meta={closedMeta[0]} useVideo={true}/>
+                  <ClosedPanel meta={closedMeta[1]}/>
+                  <ClosedPanel meta={closedMeta[2]}/>
+                  <ClosedPanel meta={closedMeta[3]}/>
                 
                 </div>
             </div>
         </div>
         <div className="pl-80 pr-80"><div className="border-top"></div></div>
-        <div class="container max-w-full mx-auto py-24 px-6">
+        <div class="max-w-full mx-auto py-8 px-6">
             <h1 class="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
-                CLOSED DOORS
+                BUY CLOSED DOORS
             </h1>
             <p class="text-center text-lg text-textColor mt-2 px-6">
                 You can buy closed doors, and unlock them using the right key. There are multiple classes just like the keys.
             </p>
+
+            <h2 class="text-center text-4xl  text-textColor mt-12 font-medium leading-snug tracking-wider">
+                S-class
+            </h2>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                Each batch contains only 1 S-class door with a quantity of 1.
+            </p>
             <div class="h-1 mx-auto bg-indigo-200 w-12 opacity-75 mt-4 rounded"></div>
 
-            <div class="max-w-full md:max-w-6xl mx-auto my-3 md:px-8">
-                <div class="relative flex flex-col md:flex-row items-center">
-                  <ClosedPanel meta={closedMeta[4]}></ClosedPanel>    
+            <div class="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={closedMeta[4]}/>    
                 </div>
             </div>
         </div>
-        <div class="container max-w-full mx-auto py-12 px-6">
-            <div class="max-w-full md:max-w-6xl mx-auto my-3 md:px-8">
-                <div class="relative flex flex-col md:flex-row items-center">
-                  <ClosedPanel meta={closedMeta[5]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[6]}></ClosedPanel>
+        <div class="max-w-full mx-auto px-6">
+          <h2 class="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
+                A-class
+            </h2>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                Each batch contains 2 A-class doors with a quantity of 2 each, making a total of 4.
+            </p>
+            <div class="max-w-full md:max-w-5xl mx-auto my-6 md:px-8">
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={closedMeta[5]}/>
+                  <ClosedPanel meta={closedMeta[6]}/>
                 </div>
             </div>
         </div>
-        <div class="container max-w-full mx-auto py-12 px-6">
-            <div class="max-w-full md:max-w-6xl mx-auto my-3 md:px-8">
-                <div class="relative flex flex-col md:flex-row items-center">
+        <div class="max-w-full mx-auto px-6">
+          <h2 class="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
+                B-class
+            </h2>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                Each batch contains 3 B-class doors with a quantity of 5 each, making a total of 15.
+            </p>
+            <div class="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={closedMeta[7]}/>
+                  <ClosedPanel meta={closedMeta[8]}/>
+                  <ClosedPanel meta={closedMeta[9]}/>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-full mx-auto px-6">
+          <h2 class="text-center text-4xl text-textColor font-medium leading-snug tracking-wider">
+                C-class
+            </h2>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                Each batch contains 4 C-class doors with a quantity of 10 each, making a total of 40.
+            </p>
+            <div class="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={closedMeta[10]}/>
+                  <ClosedPanel meta={closedMeta[11]}/>
+                  <ClosedPanel meta={closedMeta[12]}/>
+                  <ClosedPanel meta={closedMeta[13]}/>
+                </div>
+            </div>
+        </div>
 
-                  <ClosedPanel meta={closedMeta[7]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[8]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[9]}></ClosedPanel>
+        <div className="pl-80 pr-80"><div className="border-top"></div></div>
+        <div class="max-w-full mx-auto py-8 px-6">
+            <h1 class="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
+               UNLOCK
+            </h1>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                You can unlock a door if you have a Closed Door and a Key of the same class.
+            </p>
+
+            <h2 class="text-center text-4xl  text-textColor mt-12 font-medium leading-snug tracking-wider">
+                S-class
+            </h2>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                Each batch contains only 1 S-class door with a quantity of 1.
+            </p>
+            <div class="h-1 mx-auto bg-indigo-200 w-12 opacity-75 mt-4 rounded"></div>
+
+            <div class="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[0 + (currentBatch - 1) * 10]} unlock={true} useVideo={true}/>   
                 </div>
             </div>
         </div>
-        <div class="container max-w-full mx-auto py-12 px-6">
-
-            <div class="max-w-full md:max-w-6xl mx-auto my-3 md:px-8">
-                <div class="relative flex flex-col md:flex-row items-center">
-                  <ClosedPanel meta={closedMeta[10]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[11]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[12]}></ClosedPanel>
-                  <ClosedPanel meta={closedMeta[13]}></ClosedPanel>
+        <div class="max-w-full mx-auto px-6">
+          <h2 class="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
+                A-class
+            </h2>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                Each batch contains 2 A-class doors with a quantity of 2 each, making a total of 4.
+            </p>
+            <div class="max-w-full md:max-w-5xl mx-auto my-6 md:px-8">
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[1 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[2 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[3 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[4 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-full mx-auto px-6">
+          <h2 class="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
+                B-class
+            </h2>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                Each batch contains 3 B-class doors with a quantity of 5 each, making a total of 15.
+            </p>
+            <div class="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
+            <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[5 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[6 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[7 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[8 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[9 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[10 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[11 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[12 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[13 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[14 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[15 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[16 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[17 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[18 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[19 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-full mx-auto px-6">
+          <h2 class="text-center text-4xl text-textColor font-medium leading-snug tracking-wider">
+                C-class
+            </h2>
+            <p class="text-center text-lg text-textColor mt-2 px-6">
+                Each batch contains 4 C-class doors with a quantity of 10 each, making a total of 40.
+            </p>
+            <div class="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[20 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[21 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[22 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[23 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[24 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[25 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[26 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[27 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[28 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[29 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[30 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[31 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[32 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[33 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[34 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[35 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[36 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[37 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[38 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[39 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[40 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[41 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[42 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[43 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[44 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[45 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[46 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[47 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[48 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[49 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[50 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[51 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[52 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[53 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[54 + (currentBatch - 1) * 10]} unlock={true}/>
+                </div>
+                <div class="relative flex flex-col md:flex-row justify-center items-center">
+                  <ClosedPanel meta={openMeta[55 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[56 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[57 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[58 + (currentBatch - 1) * 10]} unlock={true}/>
+                  <ClosedPanel meta={openMeta[59 + (currentBatch - 1) * 10]} unlock={true}/>
                 </div>
             </div>
         </div>
