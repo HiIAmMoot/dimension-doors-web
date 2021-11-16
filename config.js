@@ -2,7 +2,7 @@ module.exports = {
     collectionName: 'Dimension Doors',
     contractAddrClosed: 'test',
     contractAddrOpened: 'test',
-    contractAddrClosedRinkeby: '0x1bd1b6dab8c94b5a5375228716e334010a614b9b',
-    contractAddrOpenedRinkeby: '0xf35be437b626132ba939e14178efe0d2ab041abc',
+    contractAddrClosedRinkeby: '0x168a9198139792B0c3d54e488614842faa8b4472',
+    contractAddrOpenedRinkeby: '0x4a0B362A0Ab229D293ad8A6FA12afA817C3f8c20',
     useTestNet: true
   }

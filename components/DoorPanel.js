@@ -1,21 +1,33 @@
 import React from 'react'
+import { useState } from "react";
 import Home from '../pages/index'
 
-const ClosedPanel = (meta, supply, unlock, useVideo = false) => {
+const DoorPanel = ({updateFunc, meta, _supply, _unlock, _useVideo}) => {
+    const [supply, setSupply] = useState(_supply);
+    const [unlock, setUnlock] = useState(_unlock);
+    const [useVideo, setUseVideo] = useState(_useVideo);
 
     console.log(meta);
-    const name = meta.meta.name;
-    const image = meta.meta.image;
+    const name = meta.name;
+    const image = meta.image;
+    const tokenId = meta.token_id;
 
-    
-    if (useVideo) {
-        const AnimationUrl = meta.meta.animation_url;
+    console.log(tokenId);
+    function init() {
+        setSupply(_supply);
+        setUnlock(_unlock);
+        setUseVideo(_useVideo);
+    }
+
+    updateFunc(tokenId, this);
+
+    var AnimationUrl = "";
+    if (_useVideo) {
+        AnimationUrl = meta.animation_url;
     }
     else {
-        const AnimationUrl = meta.meta.image_url;
+        AnimationUrl = meta.image_url;
     }
-
-    const tokenId = meta.meta.tokenId;
 
     var selectedAmount = 0;
 
@@ -42,10 +54,43 @@ const ClosedPanel = (meta, supply, unlock, useVideo = false) => {
         }
     }
 
+    function viewOS() {
+
+    }
+
+    function mint() {
+
+    }
+
+    function mintAdd() {
+
+    }
+
+    function mintRemove() {
+
+    }
+
+    function mintAndUnlock() {
+
+    }
+
+    function unlockDoor() {
+
+    }
+
+    function unlockAdd() {
+
+    }
+
+    function unlockRemove() {
+
+    }
+
     function test()
     {
-        unlock = !unlock
-        console.log(unlock)
+        //setUnlock(!unlock);
+        //unlock = !unlock
+        //console.log(unlock)
 
         //   sm:w-3/5 lg:w-1/3 
     }
@@ -68,7 +113,7 @@ const ClosedPanel = (meta, supply, unlock, useVideo = false) => {
             <div className="items-center justify-center flex flex-wrap mt-3 px-6">
                 <ul>
                     {useVideo ? (
-                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} class="items-center justify-center w-full object-cover object-center"></video>
+                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} className="items-center justify-center w-full object-cover object-center"></video>
                     ) : (
                         <img src={image} alt="" class="items-center justify-center w-full object-cover object-center"></img>
                     ) }
@@ -80,7 +125,8 @@ const ClosedPanel = (meta, supply, unlock, useVideo = false) => {
             {unlock ? (
                 <div className="row justify-center items-center pt-2 pb-6">
                     <div className="flex items-center px-8 uppercase">
-                        <button className="mt-3 text-lg font-semibold bg-blue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700">
+                        <button className="mt-3 text-lg font-semibold bg-blue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
+                            onClick={test}>
                             UNLOCK
                         </button>
                     </div>
@@ -140,4 +186,4 @@ const ClosedPanel = (meta, supply, unlock, useVideo = false) => {
     )
 }
 
-export default ClosedPanel
+export default DoorPanel

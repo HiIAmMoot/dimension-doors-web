@@ -525,6 +525,29 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_doorId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_keyId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_doorOption",
+						"type": "uint256"
+					}
+				],
+				"name": "purchaseAndUnlock",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "renounceOwnership",
 				"outputs": [],
@@ -1188,11 +1211,11 @@
 			]
 		},
 		"contracts/ClosedDoors.sol": {
-			"keccak256": "0x044eea0a93b87d8bcc5205370e95e6209300167140b59cfd16b80500c1b3ebfd",
+			"keccak256": "0xa8918d82b3c8d1a7d68edd205c561f7d09d71340216107180c2cb4b48c2cc47b",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://2b4d370f1c86aabb85a97b3278a47295fd429df577c0b5a0138c56afbf13081c",
-				"dweb:/ipfs/QmbZJbgb1oustCL3bBKqyaohCrU6meN9imozooXsvQd336"
+				"bzz-raw://4319f3aab35331c4bdc958359371b9102e466a059936efe082cdc5be09eb16b9",
+				"dweb:/ipfs/QmYbZSsEQ82RRk6iXrjkyCN9Ge2fopatfra67VuNu2MNeU"
 			]
 		},
 		"contracts/OpenDoors.sol": {

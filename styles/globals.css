@@ -66,6 +66,8 @@ code {
   margin-Top: "auto";
   margin-Left : "5%";
   text-Align: "left";
+  align-items: "center";
+  justify-content: "center";
 }
 
 .nav {
