@@ -64,8 +64,7 @@ const NavBar = () => {
                 </div>
 
                 <div className="hidden sm:flex sm:items-center">
-
-                <a href="#" className="text-mainColor text-sm font-semibold border px-4 py-2 rounded-lg hover:text-purple-600 hover:border-purple-600">CONNECT WALLET</a>
+                    <a href="#" className="text-mainColor text-sm font-semibold border px-4 py-2 rounded-lg hover:text-purple-600 hover:border-purple-600">CONNECT WALLET</a>
                 </div>
 
                 <div className="sm:hidden cursor-pointer">
@@ -75,16 +74,17 @@ const NavBar = () => {
                 </div>
             </div>
             
-            <div className="block sm:hidden bg-white border-t-2 py-2">
+            <div className="block sm:hidden backgroundColor border-t-2 py-2">
                 <div className="flex flex-col">
-                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mb-1">Products</a>
-                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mb-1">Marketplace</a>
-                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mb-1">Partners</a>
-                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mb-1">Pricing</a>
-                <div className="flex justify-between items-center border-t-2 pt-2">
-                    <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">Sign in</a>
-                    <a href="#" className="text-mainColor text-sm font-semibold border px-4 py-1 rounded-lg hover:text-purple-600 hover:border-purple-600">Sign up</a>
-                </div>
+                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">BUY</a>
+                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">UNLOCK</a>
+                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">ROADMAP</a>
+                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">TEAM</a>
+                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">GALLERY</a>
+                <a href="#" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">PROVENANCE</a>
+                    <div className="flex justify-between items-center border-t-2 pt-2">
+                        <a href="#" className="text-mainColor text-sm font-semibold border px-4 py-2 rounded-lg hover:text-purple-600 hover:border-purple-600">CONNECT WALLET</a>
+                    </div>
                 </div>
             </div>
             </div>
