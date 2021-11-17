@@ -322,7 +322,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
           </div>
         </div>
 
-        <div className="pl-80 pr-80"><div className="border-top"></div></div>
+        <div className="md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 justify-center items-center"><div className="border-top"></div></div>
 
         <div className="max-w-full mx-auto py-24 px-6">
             <h1 className="text-center text-4xl text-textColor font-medium leading-snug tracking-wider">
@@ -343,7 +343,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
                 </div>
             </div>
         </div>
-        <div className="pl-80 pr-80"><div className="border-top"></div></div>
+        <div className="md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 justify-center items-center"><div className="border-top"></div></div>
         <div className="max-w-full mx-auto py-8 px-6">
             <h1 className="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
                 BUY CLOSED DOORS
@@ -412,7 +412,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </div>
         </div>
 
-        <div className="pl-80 pr-80"><div className="border-top"></div></div>
+        <div className="md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 justify-center items-center"><div className="border-top"></div></div>
         <div className="max-w-full mx-auto py-8 px-6">
             <h1 className="text-center text-4xl  text-textColor font-medium leading-snug tracking-wider">
                UNLOCK
