@@ -2,9 +2,9 @@ import React from 'react'
 import { useState } from "react";
 import Home from '../pages/index'
 
-const DoorPanel = ({updateFunc, meta, _supply, _unlock, _useVideo}) => {
+const DoorPanel = ({updateFunc, meta, _supply, _opened, _useVideo}) => {
     const [supply, setSupply] = useState(_supply);
-    const [unlock, setUnlock] = useState(_unlock);
+    const [opened, setOpened] = useState(_opened);
     const [useVideo, setUseVideo] = useState(_useVideo);
 
     console.log(meta);
@@ -13,11 +13,6 @@ const DoorPanel = ({updateFunc, meta, _supply, _unlock, _useVideo}) => {
     const tokenId = meta.token_id;
 
     console.log(tokenId);
-    function init() {
-        setSupply(_supply);
-        setUnlock(_unlock);
-        setUseVideo(_useVideo);
-    }
 
     updateFunc(tokenId, this);
 
@@ -88,9 +83,6 @@ const DoorPanel = ({updateFunc, meta, _supply, _unlock, _useVideo}) => {
 
     function test()
     {
-        //setUnlock(!unlock);
-        //unlock = !unlock
-        //console.log(unlock)
 
         //   sm:w-3/5 lg:w-1/3 
     }
@@ -113,7 +105,7 @@ const DoorPanel = ({updateFunc, meta, _supply, _unlock, _useVideo}) => {
             <div className="items-center justify-center flex flex-wrap mt-3 px-6">
                 <ul>
                     {useVideo ? (
-                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} className="items-center justify-center w-full object-cover object-center"></video>
+                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} muted={true} className="items-center justify-center w-full object-cover object-center"></video>
                     ) : (
                         <img src={image} alt="" class="items-center justify-center w-full object-cover object-center"></img>
                     ) }
@@ -122,7 +114,7 @@ const DoorPanel = ({updateFunc, meta, _supply, _unlock, _useVideo}) => {
                     
                 </ul> 
             </div>  
-            {unlock ? (
+            {opened ? (
                 <div className="row justify-center items-center pt-2 pb-6">
                     <div className="flex items-center px-8 uppercase">
                         <button className="mt-3 text-lg font-semibold bg-blue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"

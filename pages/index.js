@@ -299,10 +299,10 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
       <div className="wrapper">
 
-        <div className="md:flex space-x-16 mt-5 md:mr-0 mr-10">
-          <div className="md:flex items-center pl-4 pr-4 md:pl-12 md:pr-12 xl:pl-128 xl:pr-128">
+        <div className="md:flex justify-center items-center space-x-16 mt-5 md:mr-0 mr-10">
+          <div className="md:flex justify-center items-center pl-4 pr-4 md:pl-12 md:pr-12 xl:pl-128 xl:pr-128">
             <div className="styles_container__16cxk">
-              <video className="styles_video__32uJf" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeigab23boa2isrwou7q5badnnkqmnsu7xq2twmdpcmaluc4pxoc6vq/S_Transition.mp4" autoPlay={true}> </video>
+              <video className="styles_video__32uJf" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeigegnsqf7y5vyghi7xodgg5d6h636luerkgudss6lenqyve4ndpyi/S_Transition.mp4" autoPlay={true} muted={true}> </video>
             </div>
           </div>
         </div>
@@ -312,7 +312,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             <div className="md:flex items-center">
               <div className="">
                 <h1 className="text-4xl text-textColor font-medium leading-snug tracking-wider">DIMENSION DOORS</h1>
-                <p className="text-mainColor mt-4 text-lg font-normal ">Dimension Doors is a collection of 3504 NFTs—unique digital collectibles living on the Ethereum blockchain. This collection consists of 4 keys, 500 closed doors and 3000 open doors. Each closed door can have different quantities based on its className: S, A, B or C. Respectively consisting of 1, 2, 5, 10 quantities per closed door. Once you own a closed door an a key of that className, you can unlock that specific door and choose an 1/1 opened door NFT. Unlocking an open door will burn the closed door and key, and mint the open door of your choosing. Because each closed Dimension Door is hand-drawn, it will take time to finish the whole collection. That's why drops will happen in 50 batches consisting of the same ratios and quantities per className. </p><br></br>
+                <p className="text-mainColor mt-4 text-lg font-normal ">Dimension Doors is a collection of 3504 NFTs—unique digital collectibles living on the Ethereum blockchain. This collection consists of 4 keys, 500 closed doors and 3000 open doors. Each closed door can have different quantities based on its className: S, A, B or C. Respectively consisting of 1, 2, 5, 10 quantities per closed door. Once you own a closed door an a key of that className, you can unlock that specific door and choose an 1/1 opened door NFT. Unlocking an open door will burn the closed door and key, and mint the open door of your choosing. Because each closed Dimension Door is hand-drawn, it will take time to finish the whole collection. That's why drops will happen in 50 batches consisting of the same ratios and quantities per class. </p><br></br>
                   
               </div>
             </div>
@@ -362,7 +362,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[4 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[4 + (currentBatch - 1) * 10]}/>    
+                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[4 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[4 + (currentBatch - 1) * 10]} _useVideo={true}/>    
                 </div>
             </div>
         </div>
@@ -431,7 +431,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[0 + (currentBatch - 1) * 60]} _unlock={true}/>   
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[0 + (currentBatch - 1) * 60]} _opened={true} _useVideo={true}/>   
                 </div>
             </div>
         </div>
@@ -444,12 +444,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-6 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[1 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[2 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[1 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[2 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[3 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[4 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[3 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[4 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
             </div>
         </div>
@@ -462,25 +462,25 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
             <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[5 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[6 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[7 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[8 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[9 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[5 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[6 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[7 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[8 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[9 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[10 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[11 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[12 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[13 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[14 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[10 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[11 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[12 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[13 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[14 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[15 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[16 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[17 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[18 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[19 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[15 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[16 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[17 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[18 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[19 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
             </div>
         </div>
@@ -493,60 +493,60 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[20 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[21 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[22 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[23 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[24 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[20 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[21 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[22 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[23 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[24 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[25 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[26 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[27 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[28 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[29 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[25 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[26 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[27 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[28 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[29 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[30 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[31 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[32 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[33 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[34 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[30 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[31 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[32 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[33 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[34 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[35 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[36 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[37 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[38 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[39 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[35 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[36 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[37 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[38 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[39 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[40 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[41 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[42 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[43 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[44 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[40 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[41 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[42 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[43 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[44 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[45 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[46 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[47 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[48 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[49 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[45 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[46 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[47 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[48 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[49 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[50 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[51 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[52 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[53 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[54 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[50 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[51 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[52 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[53 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[54 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[55 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[56 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[57 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[58 + (currentBatch - 1) * 60]} _unlock={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[59 + (currentBatch - 1) * 60]} _unlock={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[55 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[56 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[57 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[58 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[59 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
             </div>
         </div>
