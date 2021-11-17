@@ -362,7 +362,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[4 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[4 + (currentBatch - 1) * 10]} _useVideo={true}/>    
+                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[4 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[4 + (currentBatch - 1) * 10]} _useVideo={false}/>    
                 </div>
             </div>
         </div>
@@ -431,7 +431,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[0 + (currentBatch - 1) * 60]} _opened={true} _useVideo={true}/>   
+                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[0 + (currentBatch - 1) * 60]} _opened={true} _useVideo={false}/>   
                 </div>
             </div>
         </div>
