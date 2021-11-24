@@ -1,20 +1,56 @@
 import React from 'react'
-import { useState } from "react";
+import { useState } from 'react';
 import Home from '../pages/index'
 
-const DoorPanel = ({updateFunc, meta, _supply, _opened, _useVideo}) => {
-    const [supply, setSupply] = useState(_supply);
+import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, keyPriceIds, doorPriceIds, quantities, supplies } from "../config";
+
+const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => {
+
+
+    const currentBatch = 1;
+
     const [opened, setOpened] = useState(_opened);
     const [useVideo, setUseVideo] = useState(_useVideo);
 
-    console.log(meta);
+    //console.log(meta);
     const name = meta.name;
     const image = meta.image;
     const tokenId = meta.token_id;
+    const doorClass = meta.attributes[1].value;
 
-    console.log(tokenId);
+    var home = updateFunc(tokenId, this);
+    console.log(home);
 
-    updateFunc(tokenId, this);
+    var _price = 1;
+    if (tokenId < 4) {
+        _price = _prices[keyPriceIds[doorClass]];
+    }
+    else {
+        _price = _prices[doorPriceIds[doorClass]];
+    }
+
+
+    const [price, setPrice] = useState(_price);
+    console.log(price)
+
+    var maxQuantity = 1;
+    if (tokenId < 4) {
+        maxQuantity = quantities[doorClass] * supplies[doorClass] * currentBatch
+    }
+    else {
+        maxQuantity = quantities[doorClass]
+    }
+
+    const [supply, setSupply] = useState((maxQuantity - _supply));
+
+    //console.log(tokenId);
+
+
+
+    var [canMintAndUnlock, setCanMintAndUnlock] = useState(false);
+    if (opened) {
+
+    }
 
     var AnimationUrl = "";
     if (_useVideo) {
@@ -50,6 +86,15 @@ const DoorPanel = ({updateFunc, meta, _supply, _opened, _useVideo}) => {
     }
 
     function viewOS() {
+        var url = "https://testnets.opensea.io/assets/";
+        if (opened) {
+            url = url + contractAddrOpenedRinkeby + "/" + tokenId.toString();
+        }
+        else {
+            url = url + contractAddrClosedRinkeby + "/" + tokenId.toString();
+        }
+
+        window.open(url, '_blank').focus();
 
     }
 
@@ -97,23 +142,34 @@ const DoorPanel = ({updateFunc, meta, _supply, _opened, _useVideo}) => {
                 <h1 className="text-lg font-medium uppercase p-3 pb-0 text-center tracking-wide">
                     {name} 
                 </h1>
-                <h2 className="text-sm text-gray-500 text-center pb-6">PRICE</h2>
-                <h2 className="text-sm text-gray-500 text-center pb-6">DESCRIPTION</h2>
+
                 
             </div>
 
-            <div className="items-center justify-center flex flex-wrap mt-3 px-6">
+            <div className="items-center justify-center flex flex-wrap mt-2 px-6">
                 <ul>
                     {useVideo ? (
-                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} muted={true} className="items-center justify-center w-full object-cover object-center"></video>
+                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} muted={true} className="rounded-xl items-center justify-center w-full object-cover object-center"></video>
                     ) : (
-                        <img src={image} alt="" class="items-center justify-center w-full object-cover object-center"></img>
+                        <img src={image} alt="" className="rounded-xl items-center justify-center w-full object-cover object-center"></img>
                     ) }
                    
                     
                     
                 </ul> 
             </div>  
+
+            
+            {opened ? (<div></div>) : (
+                            <div>
+                            <h2 className="text-lg font-bold text-gray-700 text-center pt-6 uppercase">SUPPLY {supply} / {maxQuantity}</h2>        
+                            <h2 className=" flex text-2xl font-bold text-gray-700 items-center justify-center text-center py-1 uppercase">
+                                <img src="/eth.svg" alt="ETH" className="logo"/> {price}
+                            </h2>               
+                        </div>  
+            )}
+
+
             {opened ? (
                 <div className="row justify-center items-center pt-2 pb-6">
                     <div className="flex items-center px-8 uppercase">
@@ -148,7 +204,7 @@ const DoorPanel = ({updateFunc, meta, _supply, _opened, _useVideo}) => {
 
                         <div className="flex items-center px-8 uppercase">
                             <button className="mt-3 text-lg font-semibold bg-lightBlue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
-                                    onClick={test} >
+                                    onClick={viewOS} >
                                 VIEW ON OPENSEA
                             </button>
                         </div>
@@ -159,8 +215,24 @@ const DoorPanel = ({updateFunc, meta, _supply, _opened, _useVideo}) => {
 
                     <div className="row justify-center items-center pt-2 pb-6">
                         <div className="flex items-center px-8 uppercase">
+                            <button className="disabled mt-3 text-lg font-semibold bg-red-900 w-full text-white rounded-lg px-6 py-3 block shadow-xl">
+                                SOLD OUT
+                            </button>
+                        </div>
+                        <div className="flex items-center px-8 uppercase">
+                            <button className="disabled mt-3 text-lg font-semibold bg-green-900 w-full text-white rounded-lg px-6 py-3 block shadow-xl">
+                                SOLD OUT
+                            </button>
+                        </div>
+                        <div className="flex items-center px-8 uppercase">
+                            <button className="disabled mt-3 text-lg font-semibold bg-blue-900 w-full text-white rounded-lg px-6 py-3 block shadow-xl">
+                                SOLD OUT
+                            </button>
+                        </div>
+
+                        <div className="flex items-center px-8 uppercase">
                             <button className="mt-3 text-lg font-semibold bg-lightBlue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
-                                    onClick={test} >
+                                    onClick={viewOS} >
                                 VIEW ON OPENSEA
                             </button>
                         </div>

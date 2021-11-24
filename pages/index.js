@@ -11,10 +11,9 @@ import Web3Modal from "web3modal";
 // Reference to deployed contract
 // NOTE: having issues? make sure you deployed your contract and make sure to
 // check the network you are on.
-import { contractAddrClosedRinkebys } from "../config";
+import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, etherscanKey } from "../config";
 import DimensionDoors from "../contracts/artifacts/DimensionDoors_metadata.json";
 
-import { contractAddrOpenedRinkebys } from "../config";
 import DimensionDoorsOpened from "../contracts/artifacts/DimensionDoorsOpened_metadata.json";
 import DoorPanel from '@components/DoorPanel';
 
@@ -34,8 +33,8 @@ export async function getStaticProps(context) {
       return res.json() 
     })
     .then((jsonData) => {
-      console.log(jsonData);
-      console.log(status);
+      //console.log(jsonData);
+      //console.log(status);
       return jsonData;
     })
     .catch((err) => {
@@ -64,8 +63,8 @@ export async function getStaticProps(context) {
       return res.json() 
     })
     .then((jsonData) => {
-      console.log(jsonData);
-      console.log(status);
+      //console.log(jsonData);
+      //console.log(status);
       return jsonData;
     })
     .catch((err) => {
@@ -109,18 +108,77 @@ export async function getStaticProps(context) {
   var currentClosedSupplies = [];
   var currentOpenSupplies = []
 
+  const network = "rinkeby";
+//  const provider = new ethers.providers.JsonRpcProvider();
+
+// Specify your own API keys
+// Each is optional, and if you omit it the default
+// API key for that service will be used.
+const provider = ethers.getDefaultProvider(network, {
+  etherscan: etherscanKey,
+  //infura: YOUR_INFURA_PROJECT_ID,
+  // Or if using a project secret:
+  // infura: {
+  //   projectId: YOUR_INFURA_PROJECT_ID,
+  //   projectSecret: YOUR_INFURA_PROJECT_SECRET,
+  // },
+  //alchemy: YOUR_ALCHEMY_API_KEY,
+  //pocket: YOUR_POCKET_APPLICATION_KEY
+  // Or if using an application secret key:
+  // pocket: {
+  //   applicationId: ,
+  //   applicationSecretKey:
+  // }
+});
+
+  //console.log(contractAddrClosedRinkeby);
+  //console.log(DimensionDoors.output.abi);
+  //console.log(provider);
+  const closedContract = new ethers.Contract(contractAddrClosedRinkeby, DimensionDoors.output.abi, provider)
+  const openedContract = new ethers.Contract(contractAddrOpenedRinkeby, DimensionDoorsOpened.output.abi, provider)
+
+  const pricesBigNumber = await closedContract.getPrices();
+  console.log(pricesBigNumber);
+  const converter = ethers.BigNumber.from("100000000000000");
+  var prices = []
+  for (let i = 0; i < 8; i++) {
+    const price = pricesBigNumber[i].div(converter).toNumber() * 0.0001;
+    //console.log(price);
+    prices.push(price);
+  }
+
   for (let i = 0; i < closedTokenSupply; i++) {
-    currentClosedSupplies.push(1);
+    const supply = await closedContract.tokenSupply(i);
+    //console.log(supply);
+    currentClosedSupplies.push(supply.toNumber());
   }
 
   for (let i = 0; i < openTokenSupply; i++) {
-    currentOpenSupplies.push(1);
+    const exists = await openedContract.exists(i);
+    if (exists) {
+      currentOpenSupplies.push(1);
+    }
+    currentOpenSupplies.push(0);
+    //console.log(exists);
+
+  var canMintAndUnlock = []
+
+  for (let i = 0; i < openTokenSupply; i++)
+  {
+    const meta = openMeta[i];
+    const keySupply
+    const closedSupply = currentClosedSupplies[meta.closed_id]
+
+  }
+
   }
 
   return {
-    props: {closedMeta, openMeta, currentBatch,  currentClosedSupplies, currentOpenSupplies}, // will be passed to the page component as props
+    props: {closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies, prices}, // will be passed to the page component as props
   }
 }
+
+
 
 /*
 import { createTheme, ThemeProvider, makeStyles } from '@material-ui/core/styles';
@@ -181,7 +239,7 @@ const styles = makeStyles({
   },
 })
 */
-export default function Home({closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies}) {
+export default function Home({closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies, prices}) {
   //const classNamees = styles(); 
   
   // web modal helper.
@@ -190,16 +248,19 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   var closedPanels = { 'test' : null };
 
   function updateClosedPanel(tokenId, panel) {
-    console.log(tokenId);
+    //console.log(tokenId);
     closedPanels[tokenId] = panel;
+    return this;
   }
   
 
   var openPanels = { 'test' : null };
 
   function updateOpenPanel(tokenId, panel) {
-    console.log(tokenId);
+    //console.log(tokenId);
     openPanels[tokenId] = panel;
+    console.log(panel)
+    return this;
   }
 
   console.log(closedPanels);
@@ -224,11 +285,11 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   }*/
 
 
-  const network = "rinkeby";
 
-  const provider = ethers.getDefaultProvider(network, {
-    etherscan: "DED8FFEEZ2ZC88GIQY4X4GKRSPWEI62GGG"
-});
+
+
+  	
+
 
   async function getProvider() {
     //return provider;
@@ -242,28 +303,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   var openedContract;
   //const init = await initializeContracts();
 
-  async function initializeContracts() {
-    const provider = await getProvider();
-    const { name } = await provider.getNetwork();
-    if (name !== "rinkeby") {
-      setErrorMsg(`You are on the wrong network: ${name}`);
-      return;
-    }
-
-
-    closedContract = new ethers.Contract(
-      contractAddrClosedRinkebys,
-      DimensionDoors.abi,
-      provider.getSigner()
-    );
-
-    openedContract = new ethers.Contract(
-      contractAddrOpenedRinkebys,
-      DimensionDoorsOpened.abi,
-      provider.getSigner()
-    );
-
-  }
+  
 
   
 
@@ -302,7 +342,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
         <div className="md:flex justify-center items-center space-x-16 mt-5 md:mr-0 mr-10">
           <div className="md:flex justify-center items-center pl-4 pr-4 md:pl-12 md:pr-12 xl:pl-128 xl:pr-128">
             <div className="styles_container__16cxk">
-              <video className="styles_video__32uJf" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeigegnsqf7y5vyghi7xodgg5d6h636luerkgudss6lenqyve4ndpyi/S_Transition.mp4" autoPlay={true} muted={true}> </video>
+              <video className="rounded-2xl styles_video__32uJf" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeigegnsqf7y5vyghi7xodgg5d6h636luerkgudss6lenqyve4ndpyi/S_Transition.mp4" autoPlay={true} muted={true}> </video>
             </div>
           </div>
         </div>
@@ -335,10 +375,10 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-6xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row items-center">
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[0]} _supply={currentClosedSupplies[0]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[1]} _supply={currentClosedSupplies[1]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[2]} _supply={currentClosedSupplies[2]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[3]} _supply={currentClosedSupplies[3]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[0]} _supply={currentClosedSupplies[0]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[1]} _supply={currentClosedSupplies[1]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[2]} _supply={currentClosedSupplies[2]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[3]} _supply={currentClosedSupplies[3]}/>
                 
                 </div>
             </div>
@@ -362,7 +402,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[4 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[4 + (currentBatch - 1) * 10]} _useVideo={false}/>    
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[4 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[4 + (currentBatch - 1) * 10]} _useVideo={false}/>    
                 </div>
             </div>
         </div>
@@ -375,8 +415,8 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-6 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[5 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[5 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[6 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[6 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[5 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[5 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[6 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[6 + (currentBatch - 1) * 10]}/>
                 </div>
             </div>
         </div>
@@ -389,9 +429,9 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[7 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[7 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[8 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[8 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[9 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[9 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[7 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[7 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[8 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[8 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[9 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[9 + (currentBatch - 1) * 10]}/>
                 </div>
             </div>
         </div>
@@ -404,10 +444,10 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[10 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[10 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[11 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[11 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[12 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[12 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel updateFunc={updateClosedPanel} meta={closedMeta[13 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[13 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[10 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[10 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[11 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[11 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[12 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[12 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} updateFunc={updateClosedPanel} meta={closedMeta[13 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[13 + (currentBatch - 1) * 10]}/>
                 </div>
             </div>
         </div>
@@ -431,7 +471,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[0 + (currentBatch - 1) * 60]} _opened={true} _useVideo={false}/>   
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[0 + (currentBatch - 1) * 60]} _opened={true} _useVideo={false}/>   
                 </div>
             </div>
         </div>
@@ -444,12 +484,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-6 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[1 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[2 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[1 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[2 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[3 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[4 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[3 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[4 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
             </div>
         </div>
@@ -462,25 +502,25 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
             <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[5 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[6 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[7 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[8 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[9 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[5 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[6 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[7 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[8 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[9 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[10 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[11 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[12 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[13 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[14 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[10 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[11 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[12 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[13 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[14 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[15 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[16 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[17 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[18 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[19 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[15 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[16 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[17 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[18 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[19 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
             </div>
         </div>
@@ -493,63 +533,75 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[20 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[21 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[22 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[23 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[24 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[20 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[21 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[22 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[23 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[24 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[25 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[26 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[27 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[28 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[29 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[25 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[26 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[27 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[28 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[29 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[30 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[31 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[32 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[33 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[34 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[30 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[31 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[32 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[33 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[34 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[35 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[36 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[37 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[38 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[39 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[35 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[36 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[37 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[38 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[39 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[40 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[41 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[42 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[43 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[44 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[40 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[41 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[42 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[43 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[44 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[45 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[46 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[47 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[48 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[49 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[45 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[46 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[47 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[48 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[49 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[50 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[51 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[52 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[53 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[54 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[50 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[51 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[52 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[53 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[54 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[55 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[56 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[57 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[58 + (currentBatch - 1) * 60]} _opened={true}/>
-                  <DoorPanel updateFunc={updateOpenPanel} meta={openMeta[59 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[55 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[56 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[57 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[58 + (currentBatch - 1) * 60]} _opened={true}/>
+                  <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[59 + (currentBatch - 1) * 60]} _opened={true}/>
                 </div>
             </div>
         </div>
+
+        <div className="md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 justify-center items-center"><div className="border-top"></div></div>
+
+        <div className="md:flex space-x-16 mt-5 justify-center">
+            <div className="md:flex items-center">
+              <div>
+                <h1 className="text-4xl text-textColor font-medium leading-snug tracking-wider text-center">TEAM</h1>
+                <p className="text-mainColor mt-4 text-lg font-normal">The team consists of one person, Moot. I've made the art, smart contract, and the website. You can find my socials at the bottom. </p><br></br>
+                  
+              </div>
+            </div>
+          </div>
 
 
         <Footer/>
