@@ -162,7 +162,7 @@ const provider = ethers.getDefaultProvider(network, {
     //console.log(exists);
 
   var canMintAndUnlock = []
-
+/*
   for (let i = 0; i < openTokenSupply; i++)
   {
     const meta = openMeta[i];
@@ -170,7 +170,7 @@ const provider = ethers.getDefaultProvider(network, {
     const closedSupply = currentClosedSupplies[meta.closed_id]
 
   }
-
+*/
   }
 
   return {
