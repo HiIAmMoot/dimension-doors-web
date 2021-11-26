@@ -2,7 +2,7 @@ import React from 'react'
 import { useState } from 'react';
 import Home from '../pages/index'
 
-import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, keyPriceIds, doorPriceIds, quantities, supplies } from "../config";
+import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, keyIds, doorPriceIds, quantities, supplies } from "../config";
 
 const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => {
 
@@ -18,12 +18,12 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
     const tokenId = meta.token_id;
     const doorClass = meta.attributes[1].value;
 
-    var home = updateFunc(tokenId, this);
-    console.log(home);
+    //var home = updateFunc(tokenId, this);
+    //console.log(home);
 
     var _price = 1;
     if (tokenId < 4) {
-        _price = _prices[keyPriceIds[doorClass]];
+        _price = _prices[keyIds[doorClass]];
     }
     else {
         _price = _prices[doorPriceIds[doorClass]];
@@ -31,17 +31,18 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
 
 
     const [price, setPrice] = useState(_price);
-    console.log(price)
-
+    //console.log(price)
     var maxQuantity = 1;
-    if (tokenId < 4) {
-        maxQuantity = quantities[doorClass] * supplies[doorClass] * currentBatch
-    }
-    else {
-        maxQuantity = quantities[doorClass]
+    if (!_opened) {
+        if (tokenId < 4) {
+            maxQuantity = quantities[doorClass] * supplies[doorClass] * currentBatch
+        }
+        else {
+            maxQuantity = quantities[doorClass]
+        }
     }
 
-    const [supply, setSupply] = useState((maxQuantity - _supply));
+    const [supply, setSupply] = useState(maxQuantity - _supply);
 
     //console.log(tokenId);
 
@@ -98,40 +99,34 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
 
     }
 
-    function mint() {
+    async function mint() {
+        await updateFunc("mint", tokenId, _price);
+    }
+
+    async function mintAdd() {
 
     }
 
-    function mintAdd() {
+    async function mintRemove() {
 
     }
 
-    function mintRemove() {
+    async function mintAndUnlock() {
 
     }
 
-    function mintAndUnlock() {
+    async function unlockDoor() {
+        console.log("testt");
+        updateFunc("unlock", meta.closed_id, keyIds[doorClass], meta.attributes[3].value - 1);
+    }
+
+    async function unlockAdd() {
 
     }
 
-    function unlockDoor() {
+    async function unlockRemove() {
 
     }
-
-    function unlockAdd() {
-
-    }
-
-    function unlockRemove() {
-
-    }
-
-    function test()
-    {
-
-        //   sm:w-3/5 lg:w-1/3 
-    }
-
 
 
     return (
@@ -171,32 +166,44 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
 
 
             {opened ? (
-                <div className="row justify-center items-center pt-2 pb-6">
-                    <div className="flex items-center px-8 uppercase">
-                        <button className="mt-3 text-lg font-semibold bg-blue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
-                            onClick={test}>
-                            UNLOCK
-                        </button>
+                (supply > 0) ? (
+                    <div className="row justify-center items-center pt-2 pb-6">
+                        <div className="flex items-center px-8 uppercase">
+                            <button className="mt-3 text-lg font-semibold bg-blue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
+                                onClick={unlockDoor}>
+                                UNLOCK
+                            </button>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="row justify-center items-center pt-2 pb-6">
+                        <div className="flex items-center px-8 uppercase">
+                            <button className="mt-3 text-lg font-semibold bg-red-900 w-full disabled text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700">
+                                DOOR UNLOCKED
+                            </button>
+                        </div>
+                    </div>
+                )
             ) : (
 
                 (supply > 0 ? (
 
                     <div className="row justify-center items-center pt-2 pb-6">
                         <div className="flex items-center px-8 uppercase">
-                            <button className="mt-3 text-lg font-semibold bg-red-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700">
+                            <button className="mt-3 text-lg font-semibold bg-red-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
+                                onClick={mintRemove}>
                                 REMOVE
                             </button>
                         </div>
                         <div className="flex items-center px-8 uppercase">
-                            <button className="mt-3 text-lg font-semibold bg-green-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700">
+                            <button className="mt-3 text-lg font-semibold bg-green-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
+                                onClick={mintAdd}>
                                 ADD
                             </button>
                         </div>
                         <div className="flex items-center px-8 uppercase">
                             <button className="mt-3 text-lg font-semibold bg-blue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
-                                    onClick={test} >
+                                    onClick={mint} >
                                 MINT
                             </button>
                         </div>

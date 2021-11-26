@@ -821,19 +821,13 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "_id",
-						"type": "uint256"
-					}
-				],
+				"inputs": [],
 				"name": "totalSupply",
 				"outputs": [
 					{
-						"internalType": "uint256",
+						"internalType": "uint256[]",
 						"name": "",
-						"type": "uint256"
+						"type": "uint256[]"
 					}
 				],
 				"stateMutability": "view",
@@ -1001,11 +995,6 @@
 						"_owner": "the adress of the owner to check"
 					}
 				},
-				"totalSupply(uint256)": {
-					"params": {
-						"_id": "ID of the token to query"
-					}
-				},
 				"transferOwnership(address)": {
 					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
 				},
@@ -1045,8 +1034,8 @@
 				"tokensByOwner(address)": {
 					"notice": "Returns an array of which consists of the quantities of each token the owner holds"
 				},
-				"totalSupply(uint256)": {
-					"notice": "Returns the total quantity for a token ID"
+				"totalSupply()": {
+					"notice": "Returns the total quantity for every token ID"
 				},
 				"unlock(uint256,uint256,uint256)": {
 					"notice": "Mints a specific door with a door/key-pair and an option id, then burns the closed door and key tokens"
@@ -1211,11 +1200,11 @@
 			]
 		},
 		"contracts/ClosedDoors.sol": {
-			"keccak256": "0xa8918d82b3c8d1a7d68edd205c561f7d09d71340216107180c2cb4b48c2cc47b",
+			"keccak256": "0x9bf2914ee02eab62d130f653070b8cd45d435df8965225ede00139eacf4fddf5",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://4319f3aab35331c4bdc958359371b9102e466a059936efe082cdc5be09eb16b9",
-				"dweb:/ipfs/QmYbZSsEQ82RRk6iXrjkyCN9Ge2fopatfra67VuNu2MNeU"
+				"bzz-raw://5c413e7cea1fdb3110611d301d65a58573945f3015024c8ec0b0a8fb684bbd11",
+				"dweb:/ipfs/QmQwSnTaiuMzJXMNLGpcVbU65sdU9WtMEvoQnimCWDWeD1"
 			]
 		},
 		"contracts/OpenDoors.sol": {
