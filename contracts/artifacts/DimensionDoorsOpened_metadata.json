@@ -520,6 +520,19 @@
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "tokenSupplies",
+				"outputs": [
+					{
+						"internalType": "bool[]",
+						"name": "",
+						"type": "bool[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [
 					{
 						"internalType": "uint256",
@@ -833,11 +846,11 @@
 			]
 		},
 		"contracts/OpenDoors.sol": {
-			"keccak256": "0xf77f9031b7302753110760bd4b8ca37b33ddf154cdcc252224d96aa9cc7a4ad1",
+			"keccak256": "0xa99223404dddb447521f8c2e9fa645c20a99bc907260f658dd801cb78df9a3fb",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://37b2d0b3c6cc03f10ba0bfbcd11868f1cabd6c9146fdd7ac5b6b23ffad59d4a3",
-				"dweb:/ipfs/QmPxUaQ9L33XcFcj5HpBTLhKZwKeU1cBjqQoDKw4Yypo5n"
+				"bzz-raw://bdefb34e47c13518b6674cbfffa0e611126af427e30d1b63c452b2a7cba73893",
+				"dweb:/ipfs/QmTkijHbcHP1wGepjCsLkumxxCwboAhuXz5sJYEKcUkzDi"
 			]
 		}
 	},

@@ -11,18 +11,20 @@ import Web3Modal from "web3modal";
 // Reference to deployed contract
 // NOTE: having issues? make sure you deployed your contract and make sure to
 // check the network you are on.
-import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, etherscanKey } from "../config";
+import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, etherscanKey, infuraId, infuraSecret, network } from "../config";
 import DimensionDoors from "../contracts/artifacts/DimensionDoors_metadata.json";
 
 import DimensionDoorsOpened from "../contracts/artifacts/DimensionDoorsOpened_metadata.json";
 import DoorPanel from '@components/DoorPanel';
 
 
+export const staticPageGenerationTimeout = 2;
+
 export async function getStaticProps(context) {
 
-  
+
   function getClosedURI() {
-    return "https://ipfs.io/ipfs/QmeqMKPQHxCX7aYv4QKgPEMdKBmREe2LTfq8CBvH4hSy5y/";
+    return "https://ipfs.io/ipfs/QmbtPsrPaq2DmktPJKWadN5yiehdbyvzNUuhLgHRp5qoRi/";
   }
 
   async function getClosedMetadata(tokenId) {
@@ -39,24 +41,18 @@ export async function getStaticProps(context) {
     })
     .catch((err) => {
       // handle error
-      console.error(err);
+      return null;
+      //console.error(err);
     });
   }
 
-  async function getClosedImage(tokenId) {
-    //console.log("test");
-    //console.log(getClosedMetadata(tokenId).image);
-    const meta = await getClosedMetadata(tokenId);
-    console.log(meta.image)
-    return meta.image;
-  }
-
   function getOpenedURI() {
-    return "https://ipfs.io/ipfs/QmRtkfhtBKNaVr3qJ8sABuBaviZCCFpPtvkJLe5QYxnWPn/";
+    return "https://ipfs.io/ipfs/QmYtBe9JxmttweaTUmSBQvPFuNEPr7nqnCQ8FUZXu8rZZ3/";
   }
 
   async function getOpenMetadata(tokenId) {
     let status;
+
     return fetch(getOpenedURI().concat(tokenId.toString()))
     .then((res) => { 
       status = res.status; 
@@ -69,76 +65,73 @@ export async function getStaticProps(context) {
     })
     .catch((err) => {
       // handle error
-      console.error(err);
+      return null;
+      //console.error(err);
     });
   }
 
-
-
-  async function getOpenedImage(tokenId) {
-    const meta = await getopenMetadata(tokenId);
-    return meta.image;
+  async function buildClosedMeta(){
+    //console.log('Start')
+    var meta = await getClosedMetadata("combined");
+    return meta.meta;
   }
+
+
+  async function buildOpenMeta(){
+    //console.log('Start')
+    var meta = await getOpenMetadata("combined");
+    return meta.meta;
+  }
+
+  console.log("Initializing read only provider..");
+  // Specify your own API keys
+  // Each is optional, and if you omit it the default
+  // API key for that service will be used.
+  const provider = ethers.getDefaultProvider(network, {
+    etherscan: etherscanKey,
+    //infura: YOUR_INFURA_PROJECT_ID,
+    // Or if using a project secret:
+     infura: {
+       projectId: infuraId,
+       projectSecret: infuraSecret,
+     },
+    //alchemy: YOUR_ALCHEMY_API_KEY,
+    //pocket: YOUR_POCKET_APPLICATION_KEY
+    // Or if using an application secret key:
+    // pocket: {
+    //   applicationId: ,
+    //   applicationSecretKey:
+    // }
+  });
+
+  var time = Date.now();
+
+
+
+  console.log("Initializing contracts..");
+  const closedContract = new ethers.Contract(contractAddrClosedRinkeby, DimensionDoors.output.abi, provider)
+  const openedContract = new ethers.Contract(contractAddrOpenedRinkeby, DimensionDoorsOpened.output.abi, provider)
 
   var currentBatch = 1;
   const closedTokenSupply = 4 + 10 * currentBatch;
   const openTokenSupply = currentBatch * 60;
 
-  async function buildClosedMeta(){
-    //console.log('Start')
-    var meta = {};
-    for (let i = 0; i < closedTokenSupply; i++) {
-      meta[i] = await getClosedMetadata(i);
-    }
-    return meta;
-  }
-
-  async function buildOpenMeta(){
-    //console.log('Start')
-    var meta = {};
-    for (let i = 0; i < openTokenSupply; i++) {
-      meta[i] = await getOpenMetadata(i);
-    }
-    return meta;
-  }
-
+  console.log("Building closed meta..");
   const closedMeta = await buildClosedMeta();
+
+  var dTime = Date.now() - time;
+  time = Date.now();
+  console.log(`Closed meta built taking ${Math.floor(dTime / 1000)} seconds.`);
+
+  console.log("Building open meta..");
   const openMeta = await buildOpenMeta();
 
-  var currentClosedSupplies = [];
-  var currentOpenSupplies = []
+  dTime = Date.now() - time;
+  time = Date.now();
+  console.log(`Open meta built taking ${Math.floor(dTime / 1000)} seconds.`);
 
-  const network = "rinkeby";
-//  const provider = new ethers.providers.JsonRpcProvider();
-
-// Specify your own API keys
-// Each is optional, and if you omit it the default
-// API key for that service will be used.
-const provider = ethers.getDefaultProvider(network, {
-  etherscan: etherscanKey,
-  //infura: YOUR_INFURA_PROJECT_ID,
-  // Or if using a project secret:
-  // infura: {
-  //   projectId: YOUR_INFURA_PROJECT_ID,
-  //   projectSecret: YOUR_INFURA_PROJECT_SECRET,
-  // },
-  //alchemy: YOUR_ALCHEMY_API_KEY,
-  //pocket: YOUR_POCKET_APPLICATION_KEY
-  // Or if using an application secret key:
-  // pocket: {
-  //   applicationId: ,
-  //   applicationSecretKey:
-  // }
-});
-
-  //console.log(contractAddrClosedRinkeby);
-  //console.log(DimensionDoors.output.abi);
-  //console.log(provider);
-  const closedContract = new ethers.Contract(contractAddrClosedRinkeby, DimensionDoors.output.abi, provider)
-  const openedContract = new ethers.Contract(contractAddrOpenedRinkeby, DimensionDoorsOpened.output.abi, provider)
-
+  console.log("Getting prices..");
   const pricesBigNumber = await closedContract.getPrices();
-  console.log(pricesBigNumber);
   const converter = ethers.BigNumber.from("1000000000000000");
   var prices = []
   for (let i = 0; i < 8; i++) {
@@ -147,87 +140,63 @@ const provider = ethers.getDefaultProvider(network, {
     prices.push(price);
   }
 
+  
+  dTime = Date.now() - time;
+  time = Date.now();
+  console.log(`Getting prices taking ${Math.floor(dTime / 1000)} seconds.`);
+
+
+  console.log("Building closed supplies..");
+  const _currentClosedSupplies = await closedContract.totalSupply();
+  var currentClosedSupplies = Array(closedTokenSupply);
   for (let i = 0; i < closedTokenSupply; i++) {
-    const availableSupply = await closedContract.tokenSupply(i);
-    const burnedSupply = await closedContract.burnedSupply(i);
+    try {
+      currentClosedSupplies[i] = _currentClosedSupplies[i].toNumber();
+    }
+    catch (error) {
+      currentClosedSupplies[i] = 0
+    }
+    //console.log(i);
+    //const availableSupply = await closedContract.tokenSupply(i);
+    //const burnedSupply = await closedContract.burnedSupply(i);
     //console.log(supply);
-    currentClosedSupplies.push(availableSupply.toNumber() + burnedSupply.toNumber());
+    //currentClosedSupplies.push(availableSupply.toNumber() + burnedSupply.toNumber());
   }
 
-  for (let i = 0; i < openTokenSupply; i++) {
-    const exists = await openedContract.exists(i);
+  dTime = Date.now() - time;
+  time = Date.now();
+  console.log(`Closed supplies built taking ${Math.floor(dTime / 1000)} seconds.`);
+
+  console.log("Getting open supplies..");
+  //const _currentOpenSupplies = await openedContract.tokenSupplies();
+  var currentOpenSupplies = await openedContract.tokenSupplies();
+  /*for (let i = 0; i < openTokenSupply; i++) {
+
+
+    var exists = false
+    try {
+      exists = await openedContract.exists(i);
+    }
+    catch (error) {
+      exists = false;
+    }
+
     if (exists) {
-      currentOpenSupplies.push(1);
+      currentOpenSupplies[i] = 1;
     }
     else {
-      currentOpenSupplies.push(0);
+      currentOpenSupplies[i] = 0;
     }
 
-    //console.log(exists);
-
-  var canMintAndUnlock = []
-/*
-  for (let i = 0; i < openTokenSupply; i++)
-  {
-    const meta = openMeta[i];
-    const keySupply
-    const closedSupply = currentClosedSupplies[meta.closed_id]
-
-  }
-*/
-  }
-
-  async function getGas(url) {
-    let status;
-    return fetch(url)
-    .then((res) => { 
-      status = res.status; 
-      return res.json() 
-    })
-    .then((jsonData) => {
-      //console.log(jsonData);
-      //console.log(status);
-      return jsonData;
-    })
-    .catch((err) => {
-      // handle error
-      console.error(err);
-    });
-  }
-  /*
-  const adresses = ["0x7a250d5630b4cf539739df2c5dacb4c659f2488d", "0xdac17f958d2ee523a2206206994597c13d831ec7", "0x7be8076f4ea4a4ad08075c2508e481d6c946d12b",
-                    "0xe592427a0aece92de3edee1f18e0157c05861564", "0x881d40237659c251811cec9c364ef91dc08d300c", "0x1111111254fb6c44bac0bed2854e76f90643097d", 
-                  "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "0xfbddadd80fe7bda00b901fbaf73803f2238ae655", "0xd9e1ce17f2641f24ae83637ab66a2cca9c378b9f",
-                "0x9b9647431632af44be02ddd22477ed94d14aacaa", "0x15d4c048f83bd7e37d49ea4c83a07267ec4203da", "0xa5409ec958c83c3f309868babaca7c86dcb077c1", 
-              "0xa57bd00134b2850b2a1c55860c9e9ea100fdd6cf", "0xe66b31678d6c16e9ebf358268a790b763c133750", "0x653430560be843c4a3d143d0110e896c2ab8ac0d",
-            "0x7be8076f4ea4a4ad08075c2508e481d6c946d12b", "0x0000000000000000000000000000000000000000"]
-
-  var baseUrl = "http://api.etherscan.io/api?module=account&action=txlist&address=[ADRESS]&startblock=0&endblock=99999999&sort=desc&apikey=DED8FFEEZ2ZC88GIQY4X4GKRSPWEI62GGG"
-  //const result = await getGas(url)
- // var gas = result["result"]
-  //console.log(gas);
-  const test = 0
-  for (let i = 0; i < adresses.length; i++) {
-    //if (i != test) {
-    //  continue
-    //}
-    const url = baseUrl.replace("[ADRESS]", adresses[i])
-    const result = await getGas(url)
-    var gas = result["result"]
-    for (let i2 = 0; i2 < gas.length; i2++) {
-      const tx = gas[i2]
-      const timestamp = Number(tx["timeStamp"])
-      const gasPrice = Number(tx["gasPrice"])
-      //console.log(tx["timeStamp"])
-      if (timestamp > 1637708400 && (gasPrice / 1000000000 < 70)) {
-        //continue;
-        console.log(gasPrice / 1000000000)
-      }
-    }
+    //console.log(i);
   }*/
 
 
+  dTime = Date.now() - time;
+  time = Date.now();
+  console.log(`Open supplies built taking ${Math.floor(dTime / 1000)} seconds.`);
 
+  console.log("---INIT DONE---")
   return {
     props: {closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies, prices}, // will be passed to the page component as props
   }
@@ -295,48 +264,133 @@ const styles = makeStyles({
 })
 */
 export default function Home({closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies, prices}) {
-  //const classNamees = styles(); 
-  
-  // web modal helper.
-  // TODO: config cache
 
-  var closedPanels = { 'test' : null };
+  var selectedClosedTokens = {}
+  var selectedTokensLength = 0;
+  var selectedTokensPrice = 0.0;
 
-  async function updateClosedPanel(arg, tokenId, price) {
+  const readOnlyProvider = ethers.getDefaultProvider(network, {
+    etherscan: etherscanKey,
+    //infura: YOUR_INFURA_PROJECT_ID,
+    // Or if using a project secret:
+    infura: {
+       projectId: infuraId,
+       projectSecret: infuraSecret,
+    },
+    //alchemy: YOUR_ALCHEMY_API_KEY,
+    //pocket: YOUR_POCKET_APPLICATION_KEY
+    // Or if using an application secret key:
+    // pocket: {
+    //   applicationId: ,
+    //   applicationSecretKey:
+    // }
+  });
 
+  var closedUpdateSupplyFuncs = {}
+  var openUpdateSupplyFuncs = {}
+
+  async function updateClosedPanel(arg, tokenId, price, init) {
+
+    if (arg == "init") {
+      openUpdateSupplyFuncs[tokenId] = init; 
+    }
 
     if (arg == "mint") {
-      await mintSingle(tokenId, price);
+      const dSupply = await mintSingle(tokenId, price);
+      return dSupply;
     }
-    //console.log(tokenId);
-    //closedPanels[tokenId] = panel;
-    //return this;
+
+    if (arg == "add") {
+      if (selectedTokensLength < 10) {
+        try {
+          selectedClosedTokens[tokenId] = selectedClosedTokens[tokenId] + 1;
+        } catch (error) {
+          console.log(error);
+          selectedClosedTokens[tokenId] = 1
+        } 
+        selectedTokensPrice = selectedTokensPrice + price;
+        selectedTokensLength++;
+        console.log(selectedTokensPrice, " - ", selectedTokensLength);
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+
+    if (arg == "remove") {
+      if (selectedTokensLength > 0) {
+        try {
+          if (selectedClosedTokens[tokenId] > 0) {
+            selectedClosedTokens[tokenId] =  selectedClosedTokens[tokenId] - 1;
+            selectedTokensLength--;
+            selectedTokensPrice = selectedTokensPrice - price;
+            console.log(selectedTokensPrice, " - ", selectedTokensLength);
+            return 1;
+          } else {
+            return 0;
+          }
+        } catch (error) {
+          console.log(error);
+          return 0;
+        } 
+      } else {
+        return 0;
+      }
+    }
   }
   
 
-  var openPanels = { 'test' : null };
-
-  async function updateOpenPanel(arg, tokenId, keyId, doorOption) {
-    if (arg == "unlock") {
-      await unlockSingle(tokenId, keyId, doorOption);
+  async function updateOpenPanel(arg, tokenId, keyId, doorOption, init) {
+    if (arg == "init") {
+      openUpdateSupplyFuncs[(tokenId, doorOption)] = init; 
     }
+
+    if (arg == "unlock") {
+      // tokenId here is the id of the closed door
+      const dSupply = await unlockSingle(tokenId, keyId, doorOption);
+      return dSupply;
+    }
+    if (arg == "closedSupply") {
+      const contract = new ethers.Contract(
+        contractAddrClosedRinkeby,
+        DimensionDoors.output.abi,
+        readOnlyProvider
+      );
+      
+      // tokenId here is the id of the closed door
+      const availableSupply = await contract.tokenSupply(tokenId);
+      const burnedSupply = await contract.burnedSupply(tokenId);
+
+      return (availableSupply.toNumber + burnedSupply.toNumber);
+    }
+    if (arg == "keySupply") {
+      const contract = new ethers.Contract(
+        contractAddrClosedRinkeby,
+        DimensionDoors.output.abi,
+        readOnlyProvider
+      );
+
+      const availableSupply = await contract.tokenSupply(keyId);
+      const burnedSupply = await contract.burnedSupply(keyId);
+
+      return (availableSupply.toNumber + burnedSupply.toNumber);
+    }
+    if (arg == "mintUnlock") { 
+      
+
+    }
+
     //console.log(tokenId);
     //openPanels[tokenId] = panel;
     //console.log(panel)
     //return this;
   }
-
-  console.log(closedPanels);
-  console.log(openPanels);
   
   const [errorMsg, setErrorMsg] = useState(undefined);
   const [mintForm, updateMintForm] = useState({
     price: "",
     numToMint: "1",
   });
-
-  var selectedClosedTokens = [];
-  var selectedOpenTokens = [];
 
   var introImage = "https://ipfs.io/ipfs/bafybeiexyrczk5gqa7sfmqihffv2qaoqvb5ne4in2sogh34okoim7qxxnu/A2_1.png"
 
@@ -352,15 +406,14 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   var closedContract;
   var openedContract;
   //const init = await initializeContracts();
-
-  
-  async function unlockSingle(tokenId, keyId, doorOption) {
+ 
+  async function unlockSingle(closedId, keyId, doorOption) {
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
     if (name !== "rinkeby") {
       setErrorMsg(`You are on the wrong network: ${name}`);
-      return;
+      return 0;
     }
     const contract = new ethers.Contract(
       contractAddrClosedRinkeby,
@@ -369,12 +422,69 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     );
 
     try {
-      const token = await contract.unlock(Number(tokenId), Number(keyId), Number(doorOption));
+      const token = await contract.unlock(Number(closedId), Number(keyId), Number(doorOption));
       await token.wait();
     } catch (error) {
       setErrorMsg(error.message);
       console.log(error.message);
+      return 0;
     }
+    return 1;
+  }
+
+  async function mintAndUnlock(closedId, keyid, doorOption) {
+    //const { numToMint } = mintForm;
+    const provider = await getProvider();
+    const { name } = await provider.getNetwork();
+    if (name !== "rinkeby") {
+      setErrorMsg(`You are on the wrong network: ${name}`);
+      return 0;
+    }
+    const contract = new ethers.Contract(
+      contractAddrClosedRinkeby,
+      DimensionDoors.output.abi,
+      provider.getSigner()
+    );
+
+    try {
+      const token = await contract.unlock(Number(closedId), Number(keyId), Number(doorOption));
+      await token.wait();
+    } catch (error) {
+      setErrorMsg(error.message);
+      console.log(error.message);
+      return 0;
+    }
+    return 1;
+  }
+  
+
+  async function mintBulk(tokenIds, amounts, _price) {
+    //const { numToMint } = mintForm;
+    const provider = await getProvider();
+    const { name } = await provider.getNetwork();
+    if (name !== "rinkeby") {
+      setErrorMsg(`You are on the wrong network: ${name}`);
+      return 0;
+    }
+    const contract = new ethers.Contract(
+      contractAddrClosedRinkeby,
+      DimensionDoors.output.abi,
+      provider.getSigner()
+    );
+
+
+    const converter = ethers.BigNumber.from("1000000000000000");
+    const priceFinney = ethers.BigNumber.from(`${_price * 1000}`);
+    const price = ethers.utils.formatUnits(`${priceFinney.mul(converter)}`, "wei");
+    try {
+      const token = await contract.mint(tokenIds, amounts, { value: price });
+      await token.wait();
+    } catch (error) {
+      setErrorMsg(error.message);
+      console.log(error.message);
+      return 0;
+    }
+    return 1;
   }
   
 
@@ -384,7 +494,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     const { name } = await provider.getNetwork();
     if (name !== "rinkeby") {
       setErrorMsg(`You are on the wrong network: ${name}`);
-      return;
+      return 0;
     }
     const contract = new ethers.Contract(
       contractAddrClosedRinkeby,
@@ -402,9 +512,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     } catch (error) {
       setErrorMsg(error.message);
       console.log(error.message);
+      return 0;
     }
+    return 1;
   }
-
+  
+  console.log("Building page..")
   return (
     
     <div className="main justify-center items-center">
@@ -573,7 +686,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             <p className="text-center text-lg text-textColor mt-2 px-6">
                 Each batch contains 3 B-class doors with a quantity of 5 each, making a total of 15.
             </p>
-            <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
+            <div className="max-w-full md:max-w-7xl mx-auto my-3 md:px-8">
             <div className="relative flex flex-col md:flex-row justify-center items-center">
                   <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[5 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[5 + (currentBatch - 1) * 60]}  _opened={true}/>
                   <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[6 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[6 + (currentBatch - 1) * 60]}  _opened={true}/>
@@ -604,7 +717,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             <p className="text-center text-lg text-textColor mt-2 px-6">
                 Each batch contains 4 C-class doors with a quantity of 10 each, making a total of 40.
             </p>
-            <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
+            <div className="max-w-full md:max-w-7xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
                   <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[20 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[20 + (currentBatch - 1) * 60]}  _opened={true}/>
                   <DoorPanel _prices={prices} updateFunc={updateOpenPanel} meta={openMeta[21 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[21 + (currentBatch - 1) * 60]}  _opened={true}/>
