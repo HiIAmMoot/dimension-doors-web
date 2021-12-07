@@ -5,16 +5,19 @@ import { ethers } from "ethers";
 
 import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, keyIds, doorPriceIds, quantities, supplies } from "../config";
 
-const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => {
+const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supply, _opened, _useVideo}) => {
 
     const converter = ethers.BigNumber.from("1000000000000000");
     const currentBatch = 1;
 
     const [opened, setOpened] = useState(_opened);
     const [useVideo, setUseVideo] = useState(_useVideo);
-    const [price, setPrice] = useState(_price);
 
-    console.log(meta);
+    const connected = (_connectedAddress != "");
+
+    const borderColors = {"S" : "border-classS", "A" : "border-classA", "B" : "border-classB", "C" : "border-classC"}
+
+    //console.log(meta);
     const name = meta.name;
     const image = meta.image;
     const tokenId = meta.token_id;
@@ -29,13 +32,14 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
     else {
         _price = _prices[doorPriceIds[doorClass]];
     }
-
+    const [price, setPrice] = useState(_price);
+    
     if (_opened) {
         closedId = meta.closed_id;
         doorOption = meta.attributes[3].value - 1;
-        updateFunc("init", closedId, keyIds[doorClass], doorOption, updateSupply);
+        _updateFunc("init", closedId, keyIds[doorClass], doorOption, updateSupply);
     } else {
-        updateFunc("init", tokenId, price, updateSupply);
+        _updateFunc("init", tokenId, price, updateSupply);
     }
 
     var maxQuantity = 1;
@@ -86,13 +90,13 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
     }
 
     async function mint() {
-        const dSupply = await updateFunc("mint", tokenId, _price);
+        const dSupply = await _updateFunc("mint", tokenId, _price);
         setSupply(supply - dSupply);
     }
 
     async function mintAdd() {
         if (selectedSupply < supply) {
-            const dSelection = await updateFunc("add", tokenId, _price);
+            const dSelection = await _updateFunc("add", tokenId, _price);
             setSelectedSupply(selectedSupply + dSelection);
             console.log(dSelection);
             console.log("Added: ", tokenId, " - ", selectedSupply);
@@ -101,7 +105,7 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
 
     async function mintRemove() {
     if (selectedSupply > 0) {
-        const dSelection = await updateFunc("remove", tokenId, _price);
+        const dSelection = await _updateFunc("remove", tokenId, _price);
         setSelectedSupply(selectedSupply - dSelection);
         console.log("Removed: ", tokenId, " - ", selectedSupply);
         }
@@ -109,13 +113,13 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
 
     async function mintAndUnlock() {
         if (canMintAndUnlock) {
-            const dSupply = await updateFunc("mintUnlock", closedId, keyIds[doorClass], doorOption);
+            const dSupply = await _updateFunc("mintUnlock", closedId, keyIds[doorClass], doorOption);
             setSupply(supply - dSupply);
         }
     }
 
     async function unlockDoor() {
-        const dSupply = await updateFunc("unlock", closedId, keyIds[doorClass], doorOption);
+        const dSupply = await _updateFunc("unlock", closedId, keyIds[doorClass], doorOption);
         setSupply(supply - dSupply);
     }
 
@@ -129,7 +133,7 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
 
     return (
 
-    <div className="max-w-full items-center justify-center w-3/8 relative rounded-lg shadow-lg sm:my-5 my-8  md:mr-2 ml-2">
+    <div className={"max-w-full items-center justify-center w-3/8 relative rounded-2xl shadow-lg sm:my-5 my-8  md:mr-2 ml-2 border-8 " + borderColors[doorClass]}>
         <div className="bg-white text-gray rounded-lg shadow-lg overflow-hidden items-center justify-center">
             <div className="block text-left text-sm sm:text-md max-w-sm mx-auto mt-2 text-black px-8 lg:px-6">
                 <h1 className="text-lg font-medium uppercase p-3 pb-0 text-center tracking-wide">
@@ -139,12 +143,12 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
                 
             </div>
 
-            <button className="items-center justify-center flex flex-wrap mt-2 px-6" onClick={openImage}>
+            <button className="items-center justify-center flex flex-wrap mt-2 px-6 pb-6 " onClick={openImage}>
                 <ul>
                     {useVideo ? (
-                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} muted={true} className="rounded-xl items-center justify-center w-full object-cover object-center"></video>
+                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} muted={true} className="rounded-xl items-center justify-center w-full object-center border-4 border-gray-200"></video>
                     ) : (
-                        <img src={image} alt="" className="rounded-xl items-center justify-center w-full object-cover object-center"></img>
+                        <img src={image} alt="" className="rounded-xl items-center justify-center w-full object-center border-2 border-gray-200"></img>
                     ) }
                    
                     
@@ -154,8 +158,14 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
 
             
             {opened ? (<div></div>) : (
-                            <div>
-                            <h2 className="text-lg font-bold text-gray-700 text-center pt-6 uppercase">SUPPLY {supply} / {maxQuantity}</h2>        
+                        <div>
+
+                            <h2 className="text-lg font-bold text-gray-700 text-center uppercase">SUPPLY {supply} / {maxQuantity}</h2>
+                            {connected ? (
+                                <h2 className="text-lg font-bold text-gray-700 text-center uppercase">OWNED {_owned} / {maxQuantity}</h2>
+                            ) : (
+                                <h2/>
+                            )}
                             <h2 className=" flex text-2xl font-bold text-gray-700 items-center justify-center text-center py-1 uppercase">
                                 <img src="/eth.svg" alt="ETH" className="logo"/> {price}
                             </h2>               
@@ -173,7 +183,7 @@ const DoorPanel = ({_prices, updateFunc, meta, _supply, _opened, _useVideo}) => 
                             </button>
 
                             <ReactTooltip id="unlockTip" place="top" effect="solid" type="dark" className="font-medium text-textColor bg-backgroundColor rounded-bg">
-                                Unlock this door if you own the right coor and key.
+                                Unlock this door if you own the right door and key.
                             </ReactTooltip>
                         </div>
                         {(canMintAndUnlock) ? (                       

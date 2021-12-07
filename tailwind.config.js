@@ -13,6 +13,10 @@ module.exports = {
     colors: {
       backgroundColor: '#212626',
       textColor: '#f4e6d4',
+      classS: '#9a00ac',
+      classA: '#e30000',
+      classB: '#009ce5',
+      classC: '#00e537',
       gray: colors.coolGray,
       blue: colors.sky,
       lightBlue: colors.cyan,
