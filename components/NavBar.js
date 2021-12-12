@@ -81,7 +81,12 @@ const NavBar = ({connectWalletFunc}) => {
                         <a href="#team" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4 pb-2">TEAM</a>
                         <div className=" justify-right items-right border-mainColor border-t-2 pt-2">
                         <div className="flex justify-right items-right py-2">
-                        <a href="https://discord.gg/G9PZWsnzx5" target="_blank" className="">
+                        
+                            <a href="https://github.com/HiIAmMoot/dimension-doors-web" target="_blank" className="">
+                                <img src="/github.svg" alt="GITHUB" className="logo-big"/>
+                            </a>
+
+                            <a href="https://discord.gg/G9PZWsnzx5" target="_blank" className="">
                                 <img src="/discord.svg" alt="DISCORD" className="logo-big"/>
                             </a>
 
