@@ -234,9 +234,9 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFunc
                 (supply > 0) ? (
                     <div className="row justify-center items-center pt-2 pb-6">
                         <div className="flex items-center px-8">
-                            <button className="mt-3 text-lg font-semibold bg-blue-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
+                            <button className="mt-3 text-lg font-semibold bg-red-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
                                 onClick={unlockDoor} data-tip data-for="unlockTip">
-                                UNLOCK
+                                LOCKED
                             </button>
 
                             <ReactTooltip id="unlockTip" place="top" effect="solid" type="dark" className="font-medium text-textColor bg-backgroundColor rounded-bg">
@@ -245,9 +245,9 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFunc
                         </div>
                         {(canMintAndUnlock) ? (                       
                             <div className="flex items-center px-8">
-                                <button className="mt-3 text-lg font-semibold bg-green-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
+                                <button className="mt-3 text-lg font-semibold bg-red-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
                                     onClick={mintAndUnlock} data-tip data-for="mintAndUnlockTip">
-                                    MINT AND UNLOCK
+                                    LOCKED
                                 </button>
 
                                 <ReactTooltip id="mintAndUnlockTip" place="top" effect="solid" type="dark" className="font-medium text-textColor bg-backgroundColor rounded-bg">
