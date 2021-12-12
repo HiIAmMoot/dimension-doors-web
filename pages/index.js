@@ -1,3 +1,4 @@
+import ReactTooltip from 'react-tooltip';
 import Head from 'next/head'
 import Header from '@components/Header'
 import Footer from '@components/Footer'
@@ -33,7 +34,7 @@ export async function getStaticProps(context) {
     return fetch(getClosedURI().concat(tokenId.toString()))
     .then((res) => { 
       status = res.status; 
-      return res.json() 
+      return res.json();
     })
     .then((jsonData) => {
       //console.log(jsonData);
@@ -48,7 +49,7 @@ export async function getStaticProps(context) {
   }
 
   function getOpenedURI() {
-    return "https://ipfs.io/ipfs/QmcmkAoSNt4hcUA7C9pVEqkbvJ9RQb8ikCHdixGyHwxNZ8/";
+    return "https://ipfs.io/ipfs/QmcPK9U4VPKjvtoHUcABtsFEyrqggydQuZ479bvgB3JtL7/";
   }
 
   async function getOpenMetadata(tokenId) {
@@ -57,7 +58,7 @@ export async function getStaticProps(context) {
     return fetch(getOpenedURI().concat(tokenId.toString()))
     .then((res) => { 
       status = res.status; 
-      return res.json() 
+      return res.json();
     })
     .then((jsonData) => {
       //console.log(jsonData);
@@ -177,12 +178,14 @@ export async function getStaticProps(context) {
     props: {closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies, prices}, // will be passed to the page component as props
   }
 }
+var selectedClosedTokens = {};
+var selectedTokensLength = 0;
+// *1000
+var selectedTokensPrice = 0;
 
 export default function Home({closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies, prices, masterClosedProvenance, masterOpenProvenance}) {
 
-  var selectedClosedTokens = {}
-  var selectedTokensLength = 0;
-  var selectedTokensPrice = 0.0;
+
 
   const [connectedAddress, setConnectedAddress] = useState("");
 
@@ -190,10 +193,10 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     etherscan: etherscanKey,
     //infura: YOUR_INFURA_PROJECT_ID,
     // Or if using a project secret:
-    infura: {
+    /*infura: {
        projectId: infuraId,
        projectSecret: infuraSecret,
-    },
+    },*/
     //alchemy: YOUR_ALCHEMY_API_KEY,
     //pocket: YOUR_POCKET_APPLICATION_KEY
     // Or if using an application secret key:
@@ -203,31 +206,53 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     // }
   });
 
-  var closedUpdateSupplyFuncs = {}
-  var openUpdateSupplyFuncs = {}
+  var closedUpdateFuncs = {}
+  var openUpdateFuncs = {}
 
-  async function updateClosedPanel(arg, tokenId, price, init) {
+  const [errorMsg, setErrorMsg] = useState(undefined);
 
+  var introImage = "https://ipfs.io/ipfs/bafybeiexyrczk5gqa7sfmqihffv2qaoqvb5ne4in2sogh34okoim7qxxnu/A2_1_preview.jpg"
+
+  var ownerClosedSupplies = [];
+  var ownerOpenedSupplies = [];
+
+  const [bulkMintEnabled, setBulkMintEnabled] = useState(false);
+  function updateClosedPanel(arg, tokenId, price, init) {
     if (arg == "init") {
-      openUpdateSupplyFuncs[tokenId] = init; 
+      closedUpdateFuncs[tokenId] = init;
+      return;
     }
-
-    if (arg == "mint") {
-      const dSupply = await mintSingle(tokenId, price);
-      return dSupply;
-    }
+    /*if (arg == "ownedSupply") {
+      console.log(tokenId);
+      var supply = ownerClosedSupplies[tokenId];
+      console.log(supply);
+      console.log(supply.toNumber());
+      if (supply == null) {
+        supply = 0;
+      }
+      else {
+        supply = supply.toNumber();
+      }
+      return supply;
+    }*/
 
     if (arg == "add") {
       if (selectedTokensLength < 10) {
-        try {
+        if(selectedClosedTokens[tokenId]) {
           selectedClosedTokens[tokenId] = selectedClosedTokens[tokenId] + 1;
-        } catch (error) {
-          console.log(error);
+          console.log("selectedClosedToken", selectedClosedTokens[tokenId])
+        } else{
           selectedClosedTokens[tokenId] = 1
+          console.log("selectedClosedToken", selectedClosedTokens[tokenId])
         } 
-        selectedTokensPrice = selectedTokensPrice + price;
-        selectedTokensLength++;
+        selectedTokensPrice = selectedTokensPrice + price * 1000;
+        selectedTokensLength = selectedTokensLength + 1;
         console.log(selectedTokensPrice, " - ", selectedTokensLength);
+        if (!bulkMintEnabled) {
+          console.log("tokenlength add", selectedTokensLength);
+          setBulkMintEnabled(true);
+          console.log("tokenlength add", selectedTokensLength);
+        }
         return 1;
       } else {
         return 0;
@@ -235,15 +260,25 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     }
 
     if (arg == "remove") {
+      console.log("tokenlength remove", selectedTokensLength);
       if (selectedTokensLength > 0) {
         try {
           if (selectedClosedTokens[tokenId] > 0) {
             selectedClosedTokens[tokenId] =  selectedClosedTokens[tokenId] - 1;
-            selectedTokensLength--;
-            selectedTokensPrice = selectedTokensPrice - price;
+            if (selectedTokensLength == 1) {
+              console.log("test1")
+              setBulkMintEnabled(false);
+              console.log("test2")
+            }
+            selectedTokensLength = selectedTokensLength - 1;
+            selectedTokensPrice = selectedTokensPrice - price * 1000;
             console.log(selectedTokensPrice, " - ", selectedTokensLength);
+
+
+            
             return 1;
           } else {
+            console.log("selectedClosedTokensLength is 0")
             return 0;
           }
         } catch (error) {
@@ -251,68 +286,62 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
           return 0;
         } 
       } else {
+        console.log("selectedTokensLength is 0")
         return 0;
       }
     }
   }
-  
-
-  async function updateOpenPanel(arg, tokenId, keyId, doorOption, init) {
-    if (arg == "init") {
-      openUpdateSupplyFuncs[(tokenId, doorOption)] = init; 
+  async function updateClosedPanelAsync(arg, tokenId, price) {
+    if (arg == "mint") {
+      const dSupply = await mintSingle(tokenId, price);
+      return dSupply;
     }
+  }
 
+  // TokenId is closed doors tokenId unless specified
+  function updateOpenPanel(arg, tokenId, keyId, doorOption, init) {
+    if (arg == "init") {
+      // TokenId is the opened doors tokenId
+      openUpdateFuncs[tokenId] = init;
+      return;
+    }
+    if (arg == "closedSupply") {
+      const supply = currentClosedSupplies[tokenId];
+      return supply;
+    }
+    if (arg == "keySupply") {
+      const supply = currentClosedSupplies[keyId];
+      return supply;
+    }
+    /*if (arg == "ownedSupply") {
+      // TokenId is the opened doors tokenId
+      //console.log(ownerOpenedSupplies)
+      /*var supply = ownerOpenedSupplies[tokenId];
+      if (supply == null) {
+        supply = 0;
+      } else {
+        supply = supply.toNumber();
+      }
+      return 0;
+    }*/
+  }
+
+  async function updateOpenPanelAsync(arg, tokenId, keyId, doorOption) {
     if (arg == "unlock") {
       // tokenId here is the id of the closed door
       const dSupply = await unlockSingle(tokenId, keyId, doorOption);
       return dSupply;
     }
-    if (arg == "closedSupply") {
-      const contract = new ethers.Contract(
-        contractAddrClosedRinkeby,
-        DimensionDoors.output.abi,
-        readOnlyProvider
-      );
-      
-      // tokenId here is the id of the closed door
-      const availableSupply = await contract.tokenSupply(tokenId);
-      const burnedSupply = await contract.burnedSupply(tokenId);
-
-      return (availableSupply.toNumber + burnedSupply.toNumber);
-    }
-    if (arg == "keySupply") {
-      const contract = new ethers.Contract(
-        contractAddrClosedRinkeby,
-        DimensionDoors.output.abi,
-        readOnlyProvider
-      );
-
-      const availableSupply = await contract.tokenSupply(keyId);
-      const burnedSupply = await contract.burnedSupply(keyId);
-
-      return (availableSupply.toNumber + burnedSupply.toNumber);
-    }
     if (arg == "mintUnlock") { 
-      
-
+      // tokenId here is the id of the closed door
+      const dSupply = await mintAndUnlock(tokenId, keyId, doorOption);
+      return dSupply;
     }
-
-    //console.log(tokenId);
-    //openPanels[tokenId] = panel;
-    //console.log(panel)
-    //return this;
   }
-  
-  const [errorMsg, setErrorMsg] = useState(undefined);
-  const [mintForm, updateMintForm] = useState({
-    price: "",
-    numToMint: "1",
-  });
 
-  var introImage = "https://ipfs.io/ipfs/bafybeiexyrczk5gqa7sfmqihffv2qaoqvb5ne4in2sogh34okoim7qxxnu/A2_1_preview.jpg"
 
-  var ownerClosedSupplies = [];
-  var ownerOpenedSupplies = [];
+
+
 
   async function getProvider() {
     //return provider;
@@ -320,25 +349,60 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     const web3Modal = new Web3Modal({});
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
-    if(!(connectedAddress != "")) {
 
-      const address = provider.getSigner().getAddress();
-      console.log("test")
-      const closedReadContract = new ethers.Contract(contractAddrClosedRinkeby, DimensionDoors.output.abi, readOnlyProvider)
-      const openedReadContract = new ethers.Contract(contractAddrOpenedRinkeby, DimensionDoorsOpened.output.abi, readOnlyProvider)
 
+    return provider;
+  }
+
+  async function initAddress() {
+    try {    if(connectedAddress == "") {
+      console.log(0);
+      const provider = await getProvider();
+      console.log(provider);
+      const signer = await provider.getSigner();
+      console.log(signer);
+      const address = await signer.getAddress();
+      console.log(address);
+      const closedReadContract = new ethers.Contract(contractAddrClosedRinkeby, DimensionDoors.output.abi, readOnlyProvider);
+      console.log(closedReadContract);
+      const openedReadContract = new ethers.Contract(contractAddrOpenedRinkeby, DimensionDoorsOpened.output.abi, readOnlyProvider);
+      console.log(openedReadContract);
+      
       ownerClosedSupplies = await closedReadContract.tokensByOwner(address);
       console.log(ownerClosedSupplies);
       ownerOpenedSupplies = await openedReadContract.tokensByOwner(address);
       console.log(ownerOpenedSupplies);
-
+  
+      for (const [key, value] of Object.entries(closedUpdateFuncs)) {
+        //console.log(`${key}: ${value}`);
+        var supply = ownerClosedSupplies[key];
+        if (supply == null) {
+          supply = 0;
+        } else {
+          supply = supply.toNumber();
+        }
+        closedUpdateFuncs[key]("connect", [true, supply, address]);
+      }
+      for (const [key, value] of Object.entries(openUpdateFuncs)) {
+        //console.log(`${key}: ${value}`);
+        var supply = ownerOpenedSupplies[key];
+        if (supply == null) {
+          supply = 0;
+        } else {
+          supply = supply.toNumber();
+        }
+        openUpdateFuncs[key]("connect", [true, supply, address]);
+      }
+  
       setConnectedAddress(address);
-
-
+      return true;
+    }}
+    catch (error) {
+      console.log(error);
+      return false;
     }
 
-    return provider;
-  }
+}
 
   var closedContract;
   var openedContract;
@@ -369,7 +433,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     return 1;
   }
 
-  async function mintAndUnlock(closedId, keyid, doorOption) {
+  async function mintAndUnlock(closedId, keyId, doorOption) {
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
@@ -383,19 +447,42 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
       provider.getSigner()
     );
 
+    // The price id of the door is offset 4 from the price id of the key
+    // So we don't need to determine the door class because we already know the key class
+    const _price = prices[keyId] + prices[keyId + 4]
+    const converter = ethers.BigNumber.from("1000000000000000");
+    const priceFinney = ethers.BigNumber.from(`${_price * 1000}`);
+    const price = ethers.utils.formatUnits(`${priceFinney.mul(converter)}`, "wei");
+
     try {
-      const token = await contract.unlock(Number(closedId), Number(keyId), Number(doorOption));
+      const token = await contract.purchaseAndUnlock(Number(closedId), Number(keyId), Number(doorOption), { value: price });
       await token.wait();
     } catch (error) {
       setErrorMsg(error.message);
       console.log(error.message);
       return 0;
     }
+    closedUpdateFuncs[closedId]("supply", 1);
+    closedUpdateFuncs[keyId]("supply", 1);
     return 1;
   }
   
+  async function mintBulkButton() {
+    var tokenIds = [];
+    var amounts = [];
+    for (const [key, value] of Object.entries(selectedClosedTokens)) {
+        if (value == null || value == 0) {
+          continue;
+        }
 
-  async function mintBulk(tokenIds, amounts, _price) {
+        tokenIds.push(key);
+        amounts.push(value);
+    }
+
+    await mintBulk(tokenIds, amounts);
+  }
+
+  async function mintBulk(tokenIds, amounts) {
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
@@ -411,7 +498,8 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
 
     const converter = ethers.BigNumber.from("1000000000000000");
-    const priceFinney = ethers.BigNumber.from(`${_price * 1000}`);
+    // selectedTokensPrice is already * 1000
+    const priceFinney = ethers.BigNumber.from(`${selectedTokensPrice}`);
     const price = ethers.utils.formatUnits(`${priceFinney.mul(converter)}`, "wei");
     try {
       const token = await contract.mint(tokenIds, amounts, { value: price });
@@ -421,6 +509,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
       console.log(error.message);
       return 0;
     }
+
+    for (let i = 0; i < tokenIds.length; i++) {
+      closedUpdateFuncs[tokenIds[i]]("supply", amounts[i]);
+      closedUpdateFuncs[tokenIds[i]]("owned", amounts[i]);
+    }
+
     return 1;
   }
   
@@ -471,9 +565,11 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   
   console.log("Building page..")
   return (
+
     
     <div id="home" className="main justify-center items-center">
-      <NavBar connectWalletFunc={getProvider}/>
+          <Header title="Dimension Doors NFTs"/>
+      <NavBar connectWalletFunc={initAddress}/>
 
       <div className="wrapper">
 
@@ -502,6 +598,20 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
         <div id="buy" className="md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 justify-center items-center"><div className="divider-top"></div></div>
 
+
+        {bulkMintEnabled ? (        <div className="md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 max-w-full  pt-8 px-6">
+                                <button className="mt-3 text-lg font-semibold bg-green-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
+                                    onClick={mintBulkButton} data-tip data-for="mintBulkTip">
+                                    MINT SELECTED
+                                </button>
+
+                                <ReactTooltip id="mintBulkTip" place="top" effect="solid" type="dark" className="font-medium text-textColor bg-backgroundColor rounded-bg">
+                                    Mint the selected keys and closed doors
+                                </ReactTooltip>
+        </div>) : (<div></div>)}
+
+
+
         <div className="max-w-full mx-auto py-8 px-6">
             <h1 className="text-center text-4xl text-textColor font-medium leading-snug tracking-wider">
                 BUY KEYS
@@ -513,10 +623,10 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-6xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[0]} _updateFunc={updateClosedPanel} meta={closedMeta[0]} _supply={currentClosedSupplies[0]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[1]} _updateFunc={updateClosedPanel} meta={closedMeta[1]} _supply={currentClosedSupplies[1]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[2]} _updateFunc={updateClosedPanel} meta={closedMeta[2]} _supply={currentClosedSupplies[2]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[3]} _updateFunc={updateClosedPanel} meta={closedMeta[3]} _supply={currentClosedSupplies[3]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[0]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[0]} _supply={currentClosedSupplies[0]} _useVideo={false}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[1]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[1]} _supply={currentClosedSupplies[1]} _useVideo={false}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[2]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[2]} _supply={currentClosedSupplies[2]} _useVideo={false}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[3]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[3]} _supply={currentClosedSupplies[3]} _useVideo={false}/>
                 
                 </div>
             </div>
@@ -540,7 +650,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[4 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[4 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[4 + (currentBatch - 1) * 10]} _useVideo={false}/>    
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[4 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[4 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[4 + (currentBatch - 1) * 10]} _useVideo={true}/>    
                 </div>
             </div>
         </div>
@@ -553,8 +663,8 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-6 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[5 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[5 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[5 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[6 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[6 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[6 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[5 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[5 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[5 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[6 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[6 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[6 + (currentBatch - 1) * 10]}/>
                 </div>
             </div>
         </div>
@@ -567,9 +677,9 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[7 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[7 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[7 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[8 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[8 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[8 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[9 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[9 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[9 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[7 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[7 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[7 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[8 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[8 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[8 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[9 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[9 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[9 + (currentBatch - 1) * 10]}/>
                 </div>
             </div>
         </div>
@@ -582,10 +692,10 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[10 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[10 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[10 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[11 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[11 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[11 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[12 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[12 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[12 + (currentBatch - 1) * 10]}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerClosedSupplies[13 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} meta={closedMeta[13 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[13 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[10 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[10 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[10 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[11 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[11 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[11 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[12 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[12 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[12 + (currentBatch - 1) * 10]}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerClosedSupplies[13 + (currentBatch - 1) * 10]} _updateFunc={updateClosedPanel} _updateFuncAsync={updateClosedPanelAsync} meta={closedMeta[13 + (currentBatch - 1) * 10]} _supply={currentClosedSupplies[13 + (currentBatch - 1) * 10]}/>
                 </div>
             </div>
         </div>
@@ -609,7 +719,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
             <div className="max-w-full md:max-w-5xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[(currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[(currentBatch - 1) * 60]} _supply={currentOpenSupplies[(currentBatch - 1) * 60]}  _opened={true} _useVideo={false}/>   
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[(currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[(currentBatch - 1) * 60]} _supply={currentOpenSupplies[(currentBatch - 1) * 60]}  _opened={true} _useVideo={true}/>   
                 </div>
             </div>
         </div>
@@ -622,12 +732,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-5xl mx-auto my-6 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[1 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[1 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[1 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[2 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[2 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[2 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[1 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[1 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[1 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[2 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[2 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[2 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[3 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[3 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[3 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[4 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[4 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[4 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[3 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[3 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[3 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[4 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[4 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[4 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
             </div>
         </div>
@@ -640,25 +750,25 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-7xl mx-auto my-3 md:px-8">
             <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[5 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[5 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[5 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[6 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[6 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[6 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[7 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[7 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[7 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[8 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[8 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[8 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[9 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[9 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[9 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[5 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[5 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[5 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[6 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[6 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[6 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[7 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[7 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[7 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[8 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[8 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[8 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[9 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[9 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[9 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[10 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[10 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[10 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[11 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[11 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[11 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[12 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[12 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[12 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[13 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[13 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[13 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[14 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[14 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[14 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[10 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[10 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[10 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[11 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[11 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[11 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[12 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[12 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[12 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[13 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[13 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[13 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[14 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[14 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[14 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[15 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[15 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[15 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[16 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[16 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[16 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[17 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[17 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[17 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[18 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[18 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[18 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[19 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[19 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[19 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[15 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[15 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[15 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[16 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[16 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[16 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[17 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[17 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[17 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[18 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[18 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[18 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[19 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[19 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[19 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
             </div>
         </div>
@@ -671,60 +781,60 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </p>
             <div className="max-w-full md:max-w-7xl mx-auto my-3 md:px-8">
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[20 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[20 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[20 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[21 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[21 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[21 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[22 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[22 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[22 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[23 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[23 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[23 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[24 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[24 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[24 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[20 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[20 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[20 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[21 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[21 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[21 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[22 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[22 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[22 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[23 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[23 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[23 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[24 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[24 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[24 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[25 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[25 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[25 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[26 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[26 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[26 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[27 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[27 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[27 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[28 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[28 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[28 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[29 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[29 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[29 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[25 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[25 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[25 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[26 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[26 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[26 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[27 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[27 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[27 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[28 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[28 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[28 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[29 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[29 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[29 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[30 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[30 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[30 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[31 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[31 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[31 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[32 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[32 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[32 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[33 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[33 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[33 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[34 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[34 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[34 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[30 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[30 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[30 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[31 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[31 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[31 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[32 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[32 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[32 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[33 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[33 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[33 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[34 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[34 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[34 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[35 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[35 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[35 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[36 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[36 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[36 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[37 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[37 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[37 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[38 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[38 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[38 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[39 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[39 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[39 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[35 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[35 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[35 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[36 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[36 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[36 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[37 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[37 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[37 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[38 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[38 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[38 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[39 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[39 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[39 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[40 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[40 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[40 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[41 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[41 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[41 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[42 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[42 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[42 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[43 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[43 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[43 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[44 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[44 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[44 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[40 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[40 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[40 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[41 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[41 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[41 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[42 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[42 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[42 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[43 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[43 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[43 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[44 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[44 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[44 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[45 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[45 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[45 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[46 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[46 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[46 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[47 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[47 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[47 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[48 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[48 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[48 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[49 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[49 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[49 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[45 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[45 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[45 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[46 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[46 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[46 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[47 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[47 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[47 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[48 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[48 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[48 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[49 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[49 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[49 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[50 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[50 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[50 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[51 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[51 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[51 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[52 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[52 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[52 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[53 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[53 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[53 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[54 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[54 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[54 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[50 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[50 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[50 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[51 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[51 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[51 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[52 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[52 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[52 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[53 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[53 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[53 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[54 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[54 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[54 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
                 <div className="relative flex flex-col md:flex-row justify-center items-center">
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[55 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[55 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[55 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[56 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[56 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[56 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[57 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[57 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[57 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[58 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[58 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[58 + (currentBatch - 1) * 60]}  _opened={true}/>
-                  <DoorPanel _prices={prices} _connectedAdress={connectedAddress} _owned={ownerOpenedSupplies[59 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} meta={openMeta[59 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[59 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[55 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[55 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[55 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[56 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[56 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[56 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[57 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[57 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[57 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[58 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[58 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[58 + (currentBatch - 1) * 60]}  _opened={true}/>
+                  <DoorPanel _prices={prices} _connectedAddress={connectedAddress} _owned={ownerOpenedSupplies[59 + (currentBatch - 1) * 60]} _updateFunc={updateOpenPanel} _updateFuncAsync={updateOpenPanelAsync} meta={openMeta[59 + (currentBatch - 1) * 60]} _supply={currentOpenSupplies[59 + (currentBatch - 1) * 60]}  _opened={true}/>
                 </div>
             </div>
         </div>
@@ -774,7 +884,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
                 <p className="text-center text-lg text-textColor mt-2 px-6">
                     The first set of provenance hashes is for keys and closed doors. Below you'll find the provenance hash for each batch and the hash for each unique NFT.
                 </p>
-
+                
                 <ProvenanceTable _metas={closedMeta} _batch={true} _batchHashes={closedBatchHashes} _closed={true}/>
                 <ProvenanceTable _metas={closedMeta} _batchHashes={closedBatchHashes}/>
 
@@ -800,8 +910,52 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
                 <p className="text-left text-lg text-textColor mt-2 px-6 md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 pb-8">
                     The final goal is to have 50 batches of closed + open doors. Each batch containing 10 closed doors and 60 open doors, and maintaining the rarity ratio that is pre-established. we're currently at batch {currentBatch}.
-                    Because the closed door NFTs are hand-made, it will take a while before all NFTs are finished. That's why the batch system is made and batches more batches will come in the following months and years.
+                    Because the closed door NFTs are hand-made, it will take a while before all NFTs are finished. That's why the batch system is made and more batches will come in the following months and years.
                 </p>
+
+                <div className="w-full mx-auto flex justify-center">
+                  <div className="bg-mainColor shadow-md rounded my-6">
+                    <table className="text-left w-full border-collapse">
+                      <thead>
+                            <tr> 
+                                <th className="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-textColor border-b border-grey-light">SOLD 75%</th>
+                                <th className="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-textColor border-b border-grey-light">GOAL</th>
+                            </tr>
+
+                      </thead>
+                      <tbody>
+                        <tr className="hover:bg-grey-lighter">
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Batch 1</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Make up to batch 5</td>
+                        </tr>
+                        <tr className="hover:bg-grey-lighter">
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Batch 5</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Make up to batch 15</td>
+                        </tr>
+                        <tr className="hover:bg-grey-lighter">
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Batch 10</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Make up to batch 25</td>
+                        </tr>
+                        <tr className="hover:bg-grey-lighter">
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Batch 20</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Make up to batch 30</td>
+                        </tr>
+                        <tr className="hover:bg-grey-lighter">
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Batch 30</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Make up to batch 40</td>
+                        </tr>
+                        <tr className="hover:bg-grey-lighter">
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Batch 40</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Make up to batch 50</td>
+                        </tr>
+                        <tr className="hover:bg-grey-lighter">
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Batch 50</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor">Project finished</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
         </div>
@@ -818,8 +972,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </div>
         </div>
 
-
-        <Footer/>
+      <Footer/>
     </div>
   )
 }

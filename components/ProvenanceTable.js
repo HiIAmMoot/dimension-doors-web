@@ -28,9 +28,15 @@ const ProvenanceTable = ({_metas, _batch, _batchHashes, _closed}) => {
         for (let i = 0; i < currentBatch; i++){
           values[i] = (<tr key={_batchHashes[i]} className="hover:bg-grey-lighter">
                           <td className="py-4 px-6 border-b border-grey-light text-textColor">{i + 1}</td>
-                          <td className="py-4 px-6 border-b border-grey-light text-textColor">{_batchHashes[i]}</td>
-                          <td className="py-4 px-6 border-b border-grey-light text-textColor">
-                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={2} cols={100} disabled={true} value={provenanceBatches[i]}/>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor table-cell md:hidden">
+                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={3} cols={5} disabled={true} value={_batchHashes[i]}/>
+                          </td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor hidden md:table-cell">{_batchHashes[i]}</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor table-cell md:hidden">
+                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={3} cols={5} disabled={true} value={provenanceBatches[i]}/>
+                          </td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor hidden md:table-cell">
+                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={3} cols={50} disabled={true} value={provenanceBatches[i]}/>
                           </td>
                         </tr>)
         }
@@ -38,9 +44,15 @@ const ProvenanceTable = ({_metas, _batch, _batchHashes, _closed}) => {
         for (let i = 0; i < currentBatch; i++){
           values[i] = (<tr key={_batchHashes[i]} className="hover:bg-grey-lighter">
                           <td className="py-4 px-6 border-b border-grey-light text-textColor">{i + 1}</td>
-                          <td className="py-4 px-6 border-b border-grey-light text-textColor">{_batchHashes[i]}</td>
-                          <td className="py-4 px-6 border-b border-grey-light text-textColor">
-                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={2} cols={100} disabled={true} value={provenanceBatches[i]}/>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor table-cell md:hidden">
+                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={3} cols={5} disabled={true} value={_batchHashes[i]}/>
+                          </td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor hidden md:table-cell">{_batchHashes[i]}</td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor table-cell md:hidden">
+                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={3} cols={5} disabled={true} value={provenanceBatches[i]}/>
+                          </td>
+                          <td className="py-4 px-6 border-b border-grey-light text-textColor hidden md:table-cell">
+                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={3} cols={50} disabled={true} value={provenanceBatches[i]}/>
                           </td>
                       </tr>)
         }
@@ -52,7 +64,10 @@ const ProvenanceTable = ({_metas, _batch, _batchHashes, _closed}) => {
       values[i] = (<tr key={_metas[i].provenance} className="hover:bg-grey-lighter">
                       <td className="py-4 px-6 border-b border-grey-light text-textColor">{_metas[i].token_id}</td>
                       <td className="py-4 px-6 border-b border-grey-light text-textColor">{_metas[i].name}</td>
-                      <td className="py-4 px-6 border-b border-grey-light text-textColor">{_metas[i].provenance}</td>
+                      <td className="py-4 px-6 border-b border-grey-light text-textColor table-cell md:hidden">
+                                <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={3} cols={5} disabled={true} value={_metas[i].provenance}/>
+                          </td>
+                      <td className="py-4 px-6 border-b border-grey-light text-textColor hidden md:table-cell">{_metas[i].provenance}</td>
                       <td className="py-4 px-6 border-b border-grey-light text-textColor">{_metas[i].attributes[_metas[i].attributes.length - 1].value}</td>
                       <td className="py-4 px-6 border-b border-grey-light text-textColor">
                         <a href={_metas[i].image} target="_blank" className="text-grey-lighter font-bold py-1 px-3 rounded text-xs bg-blue hover:bg-blue-dark">View</a>

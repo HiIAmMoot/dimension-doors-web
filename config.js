@@ -1,9 +1,9 @@
 module.exports = {
     collectionName: 'Dimension Doors',
-    contractAddrClosed: 'test',
-    contractAddrOpened: 'test',
-    contractAddrClosedRinkeby: '0x2B60D54b0bb7A73295Fe495eB19b7990d89e6d74',
-    contractAddrOpenedRinkeby: '0x0B71992372CaB31F20361a9caf81FcA28c3A8fca',
+    contractAddrClosed: '0xdF9Fb9E7731DfA4a17aDbB3a462E30470eb4d802',
+    contractAddrOpened: '0x327c246cfbE351080fCAC5B6D9C64C9aE1c10D2e',
+    contractAddrClosedRinkeby: '0x101746eF81E58c2F994b2E0c2208c89b860e59A9',
+    contractAddrOpenedRinkeby: '0x5178F4Ec1CE69F58D31aFc38c443Efe4f554dA2A',
     useTestNet: true,
     etherscanKey: 'DED8FFEEZ2ZC88GIQY4X4GKRSPWEI62GGG',
     infuraId: '710c53778f734ded80c587e8c491b12f',

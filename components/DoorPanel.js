@@ -5,15 +5,17 @@ import { ethers } from "ethers";
 
 import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, keyIds, doorPriceIds, quantities, supplies } from "../config";
 
-const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supply, _opened, _useVideo}) => {
+const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFuncAsync, meta, _supply, _opened, _useVideo, _queued}) => {
 
     const converter = ethers.BigNumber.from("1000000000000000");
     const currentBatch = 1;
 
+    var connectedAddress = _connectedAddress;
+
+    const [queued, setQueued] = useState(_queued);
     const [opened, setOpened] = useState(_opened);
     const [useVideo, setUseVideo] = useState(_useVideo);
-
-    const connected = (_connectedAddress != "");
+    const [connectedState, setConnectedState] = useState([connectedAddress != "", _owned, _connectedAddress]);
 
     const borderColors = {"S" : "border-classS", "A" : "border-classA", "B" : "border-classB", "C" : "border-classC"}
 
@@ -33,16 +35,32 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supp
         _price = _prices[doorPriceIds[doorClass]];
     }
     const [price, setPrice] = useState(_price);
-    
+
+    var _canMintAndUnlock = false;
+    var maxQuantity = 1;
     if (_opened) {
         closedId = meta.closed_id;
         doorOption = meta.attributes[3].value - 1;
-        _updateFunc("init", closedId, keyIds[doorClass], doorOption, updateSupply);
-    } else {
-        _updateFunc("init", tokenId, price, updateSupply);
+        _updateFunc("init", tokenId, keyIds[doorClass], doorOption, updatePanel);
+
+        var closedSupply = _updateFunc("closedSupply", closedId, keyIds[doorClass], doorOption, updatePanel);
+        var keySupply =  _updateFunc("keySupply", closedId, keyIds[doorClass], doorOption, updatePanel);
+
+        const doorMaxQuantity = quantities[doorClass]
+        const keyMaxQuantity = quantities[doorClass] * supplies[doorClass] * currentBatch
+
+        closedSupply = doorMaxQuantity - closedSupply;
+        keySupply = keyMaxQuantity - keySupply;
+        //console.log("closed supply", closedSupply);
+        //console.log("key supply", keySupply);
+        _canMintAndUnlock = (closedSupply > 0 && keySupply > 0);
+
+    } else if(!_queued) {
+        _updateFunc("init", tokenId, price, updatePanel);
     }
 
-    var maxQuantity = 1;
+    const [canMintAndUnlock, setCanMintAndUnlock] = useState(_canMintAndUnlock);
+
     if (!_opened) {
         if (tokenId < 4) {
             maxQuantity = quantities[doorClass] * supplies[doorClass] * currentBatch
@@ -54,7 +72,21 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supp
 
     const [supply, setSupply] = useState(maxQuantity - _supply);
     const [selectedSupply, setSelectedSupply] = useState(0);
-    const [canMintAndUnlock, setCanMintAndUnlock] = useState(false);
+    /*var ownedSupply = _owned;
+
+    if (connected && !queued) {
+
+        if (opened) {
+            ownedSupply = 0;
+            //ownedSupply = _updateFunc("ownedSupply", tokenId, keyIds[doorClass], doorOption, updatePanel);
+        } else {
+            console.log(name);
+            ownedSupply = _updateFunc("ownedSupply", tokenId, price, updatePanel);
+        }
+        //console.log(ownedSupply);
+    }
+
+    const [owned, setOwned] = useState(ownedSupply);*/
 
     var AnimationUrl = "";
     if (_useVideo) {
@@ -70,8 +102,22 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supp
         });
     }
 
-    function updateSupply(_dSupply) {
-        setSupply(supply - dSupply);
+    function updatePanel(arg, value) {
+        if (arg == "supply") {
+            setSupply(supply - value);
+            return;
+        }
+        if (arg == "connect") {
+            connectedAddress = value[2];
+            //console.log(name);
+            setConnectedState(value);
+            return;
+        }
+        if (arg == "owned") {
+            //console.log(name);
+            setConnectedState([connectedState[0], connectedState[1] + value, connectedState[2]]);
+            return;
+        }
     }
 
     function viewOS() {
@@ -90,22 +136,25 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supp
     }
 
     async function mint() {
-        const dSupply = await _updateFunc("mint", tokenId, _price);
+        const dSupply = await _updateFuncAsync("mint", tokenId, _price);
         setSupply(supply - dSupply);
+        setConnectedState([connectedState[0], connectedState[1] + dSupply, connectedState[2]]);
     }
 
-    async function mintAdd() {
+    function mintAdd() {
         if (selectedSupply < supply) {
-            const dSelection = await _updateFunc("add", tokenId, _price);
-            setSelectedSupply(selectedSupply + dSelection);
+            const dSelection = _updateFunc("add", tokenId, _price);
             console.log(dSelection);
+            setSelectedSupply(selectedSupply + dSelection);
+
             console.log("Added: ", tokenId, " - ", selectedSupply);
         }
     }
 
-    async function mintRemove() {
+    function mintRemove() {
     if (selectedSupply > 0) {
-        const dSelection = await _updateFunc("remove", tokenId, _price);
+        const dSelection = _updateFunc("remove", tokenId, _price);
+        console.log(dSelection);
         setSelectedSupply(selectedSupply - dSelection);
         console.log("Removed: ", tokenId, " - ", selectedSupply);
         }
@@ -113,14 +162,15 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supp
 
     async function mintAndUnlock() {
         if (canMintAndUnlock) {
-            const dSupply = await _updateFunc("mintUnlock", closedId, keyIds[doorClass], doorOption);
+            const dSupply = await _updateFuncAsync("mintUnlock", closedId, keyIds[doorClass], doorOption);
             setSupply(supply - dSupply);
         }
     }
 
     async function unlockDoor() {
-        const dSupply = await _updateFunc("unlock", closedId, keyIds[doorClass], doorOption);
+        const dSupply = await _updateFuncAsync("unlock", closedId, keyIds[doorClass], doorOption);
         setSupply(supply - dSupply);
+        setConnectedState([connectedState[0], connectedState[1] - dSupply, connectedState[2]]);
     }
 
     async function unlockAdd() {
@@ -133,7 +183,7 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supp
 
     return (
 
-    <div className={"max-w-full items-center justify-center w-3/8 relative rounded-2xl shadow-lg sm:my-5 my-8  md:mr-2 ml-2 border-8 " + borderColors[doorClass]}>
+    <div className={"max-w-full items-center justify-center w-3/8 relative rounded-2xl shadow-lg sm:my-5 my-8  md:mr-2 ml-2 border-8 " + ((selectedSupply > 0) ? ("border-gold") : ("border-gray-200"))}>
         <div className="bg-white text-gray rounded-lg shadow-lg overflow-hidden items-center justify-center">
             <div className="block text-left text-sm sm:text-md max-w-sm mx-auto mt-2 text-black px-8 lg:px-6">
                 <h1 className="text-lg font-medium uppercase p-3 pb-0 text-center tracking-wide">
@@ -157,22 +207,29 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supp
             </button>  
 
             
-            {opened ? (<div></div>) : (
+            {(opened || queued) ? (<div></div>) : (
                         <div>
 
                             <h2 className="text-lg font-bold text-gray-700 text-center uppercase">SUPPLY {supply} / {maxQuantity}</h2>
-                            {connected ? (
-                                <h2 className="text-lg font-bold text-gray-700 text-center uppercase">OWNED {_owned} / {maxQuantity}</h2>
+                            {connectedState[0] ? (
+                                <h2 className="text-lg font-bold text-gray-700 text-center uppercase">OWNED {connectedState[1]} / {maxQuantity}</h2>
                             ) : (
                                 <h2/>
                             )}
                             <h2 className=" flex text-2xl font-bold text-gray-700 items-center justify-center text-center py-1 uppercase">
                                 <img src="/eth.svg" alt="ETH" className="logo"/> {price}
-                            </h2>               
+                            </h2>     
+
+                            {(selectedSupply > 0) ? (
+                            <h2 className="text-lg font-bold text-gold text-center uppercase">SELECTED {selectedSupply}</h2>
+                            ) : (
+                            <h2 className="text-lg font-bold text-white text-center uppercase">{0}</h2>
+                            )}          
                         </div>  
             )}
 
-
+            
+            
             {opened ? (
                 (supply > 0) ? (
                     <div className="row justify-center items-center pt-2 pb-6">
@@ -189,7 +246,7 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, meta, _supp
                         {(canMintAndUnlock) ? (                       
                             <div className="flex items-center px-8">
                                 <button className="mt-3 text-lg font-semibold bg-green-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
-                                    onClick={unlockDoor} data-tip data-for="mintAndUnlockTip">
+                                    onClick={mintAndUnlock} data-tip data-for="mintAndUnlockTip">
                                     MINT AND UNLOCK
                                 </button>
 

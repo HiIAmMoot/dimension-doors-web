@@ -17,6 +17,7 @@ module.exports = {
       classA: '#e30000',
       classB: '#009ce5',
       classC: '#00e537',
+      gold: '#FFD700',
       gray: colors.coolGray,
       blue: colors.sky,
       lightBlue: colors.cyan,
