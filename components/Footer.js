@@ -3,7 +3,12 @@ export default function Footer() {
   return (
     <>
       <footer className="footer">
-      <a href="https://discord.gg/G9PZWsnzx5" target="_blank" className="">
+
+                    <a href="https://github.com/HiIAmMoot/dimension-doors-web" target="_blank" className="">
+                        <img src="/github.svg" alt="GITHUB" className="logo-big"/>
+                    </a>
+
+                    <a href="https://discord.gg/G9PZWsnzx5" target="_blank" className="">
                         <img src="/discord.svg" alt="DISCORD" className="logo-big"/>
                     </a>
 
