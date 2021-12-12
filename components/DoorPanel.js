@@ -3,7 +3,7 @@ import ReactTooltip from 'react-tooltip';
 import { useState } from 'react';
 import { ethers } from "ethers";
 
-import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, keyIds, doorPriceIds, quantities, supplies } from "../config";
+import { contractAddrClosed, contractAddrOpened, keyIds, doorPriceIds, quantities, supplies } from "../config";
 
 const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFuncAsync, meta, _supply, _opened, _useVideo, _queued}) => {
 
@@ -121,12 +121,12 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFunc
     }
 
     function viewOS() {
-        var url = "https://testnets.opensea.io/assets/";
+        var url = "https://opensea.io/assets/";
         if (opened) {
-            url = url + contractAddrOpenedRinkeby + "/" + tokenId.toString();
+            url = url + contractAddrOpened + "/" + tokenId.toString();
         }
         else {
-            url = url + contractAddrClosedRinkeby + "/" + tokenId.toString();
+            url = url + contractAddrClosed + "/" + tokenId.toString();
         }
         window.open(url, '_blank').focus();
     }

@@ -13,7 +13,7 @@ import Web3Modal from "web3modal";
 // Reference to deployed contract
 // NOTE: having issues? make sure you deployed your contract and make sure to
 // check the network you are on.
-import { contractAddrClosedRinkeby, contractAddrOpenedRinkeby, etherscanKey, infuraId, infuraSecret, network } from "../config";
+import { contractAddrClosed, contractAddrOpened, etherscanKey, infuraId, infuraSecret, network } from "../config";
 import DimensionDoors from "../contracts/artifacts/DimensionDoors_metadata.json";
 
 import DimensionDoorsOpened from "../contracts/artifacts/DimensionDoorsOpened_metadata.json";
@@ -109,8 +109,8 @@ export async function getStaticProps(context) {
   var time = Date.now();
 
   console.log("Initializing contracts..");
-  const closedContract = new ethers.Contract(contractAddrClosedRinkeby, DimensionDoors.output.abi, provider)
-  const openedContract = new ethers.Contract(contractAddrOpenedRinkeby, DimensionDoorsOpened.output.abi, provider)
+  const closedContract = new ethers.Contract(contractAddrClosed, DimensionDoors.output.abi, provider)
+  const openedContract = new ethers.Contract(contractAddrOpened, DimensionDoorsOpened.output.abi, provider)
 
 
 
@@ -118,8 +118,8 @@ export async function getStaticProps(context) {
   const closedTokenSupply = 4 + 10 * currentBatch;
   const openTokenSupply = currentBatch * 60;
 
-  const masterClosedProvenance = closedContract.CLOSEDDOORS_PROVENANCE_MASTER;
-  const masterOpenProvenance = openedContract.OPENDOORS_PROVENANCE_MASTER;
+  const masterClosedProvenance = await closedContract.CLOSEDDOORS_PROVENANCE_MASTER();
+  const masterOpenProvenance = await openedContract.OPENDOORS_PROVENANCE_MASTER();
   
   console.log("Building closed meta..");
   const closedMeta = await buildClosedMeta();
@@ -175,7 +175,7 @@ export async function getStaticProps(context) {
 
   console.log("---INIT DONE---")
   return {
-    props: {closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies, prices}, // will be passed to the page component as props
+    props: {closedMeta, openMeta, currentBatch, currentClosedSupplies, currentOpenSupplies, prices, masterClosedProvenance, masterOpenProvenance}, // will be passed to the page component as props
   }
 }
 var selectedClosedTokens = {};
@@ -363,9 +363,9 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
       console.log(signer);
       const address = await signer.getAddress();
       console.log(address);
-      const closedReadContract = new ethers.Contract(contractAddrClosedRinkeby, DimensionDoors.output.abi, readOnlyProvider);
+      const closedReadContract = new ethers.Contract(contractAddrClosed, DimensionDoors.output.abi, readOnlyProvider);
       console.log(closedReadContract);
-      const openedReadContract = new ethers.Contract(contractAddrOpenedRinkeby, DimensionDoorsOpened.output.abi, readOnlyProvider);
+      const openedReadContract = new ethers.Contract(contractAddrOpened, DimensionDoorsOpened.output.abi, readOnlyProvider);
       console.log(openedReadContract);
       
       ownerClosedSupplies = await closedReadContract.tokensByOwner(address);
@@ -412,12 +412,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
-    if (name !== "rinkeby") {
+    if (name !== "homestead") {
       setErrorMsg(`You are on the wrong network: ${name}`);
       return 0;
     }
     const contract = new ethers.Contract(
-      contractAddrClosedRinkeby,
+      contractAddrClosed,
       DimensionDoors.output.abi,
       provider.getSigner()
     );
@@ -437,12 +437,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
-    if (name !== "rinkeby") {
+    if (name !== "homestead") {
       setErrorMsg(`You are on the wrong network: ${name}`);
       return 0;
     }
     const contract = new ethers.Contract(
-      contractAddrClosedRinkeby,
+      contractAddrClosed,
       DimensionDoors.output.abi,
       provider.getSigner()
     );
@@ -486,12 +486,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
-    if (name !== "rinkeby") {
+    if (name !== "homestead") {
       setErrorMsg(`You are on the wrong network: ${name}`);
       return 0;
     }
     const contract = new ethers.Contract(
-      contractAddrClosedRinkeby,
+      contractAddrClosed,
       DimensionDoors.output.abi,
       provider.getSigner()
     );
@@ -523,12 +523,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
-    if (name !== "rinkeby") {
+    if (name !== "homestead") {
       setErrorMsg(`You are on the wrong network: ${name}`);
       return 0;
     }
     const contract = new ethers.Contract(
-      contractAddrClosedRinkeby,
+      contractAddrClosed,
       DimensionDoors.output.abi,
       provider.getSigner()
     );
@@ -592,6 +592,14 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             </div>
             <div className="max-w-lg pr-24 pb-8 md:flex justify-center items-center hidden">
               <img className="rounded-lg" width={3570} src={introImage} alt=""/>
+            </div>
+          </div>
+        </div>
+
+        <div className="md:flex justify-center items-center space-x-16 mb-5 md:mr-0 mr-10">
+          <div className="md:flex justify-center items-center pl-4 pr-4 md:pl-12 md:pr-12 xl:pl-128 xl:pr-128">
+            <div className="styles_container__16cxk">
+              <video className="rounded-2xl styles_video__32uJf" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeiafp2swhktchn3mnxxell5pqnnd4qvztgylz5za6ohixm56m3ed5y/Example.mp4" autoPlay={true} muted={true}> </video>
             </div>
           </div>
         </div>
