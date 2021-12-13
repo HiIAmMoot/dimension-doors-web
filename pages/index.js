@@ -234,19 +234,6 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
       closedUpdateFuncs[tokenId] = init;
       return;
     }
-    /*if (arg == "ownedSupply") {
-      console.log(tokenId);
-      var supply = ownerClosedSupplies[tokenId];
-      console.log(supply);
-      console.log(supply.toNumber());
-      if (supply == null) {
-        supply = 0;
-      }
-      else {
-        supply = supply.toNumber();
-      }
-      return supply;
-    }*/
 
     if (arg == "add") {
       if (selectedTokensLength < 10) {
@@ -283,9 +270,6 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
             selectedTokensLength = selectedTokensLength - 1;
             selectedTokensPrice = selectedTokensPrice - price * 1000;
             console.log(selectedTokensPrice, " - ", selectedTokensLength);
-
-
-            
             return 1;
           } else {
             console.log("selectedClosedTokensLength is 0")
@@ -323,17 +307,6 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
       const supply = currentClosedSupplies[keyId];
       return supply;
     }
-    /*if (arg == "ownedSupply") {
-      // TokenId is the opened doors tokenId
-      //console.log(ownerOpenedSupplies)
-      /*var supply = ownerOpenedSupplies[tokenId];
-      if (supply == null) {
-        supply = 0;
-      } else {
-        supply = supply.toNumber();
-      }
-      return 0;
-    }*/
   }
 
   async function updateOpenPanelAsync(arg, tokenId, keyId, doorOption) {
@@ -349,18 +322,10 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     }
   }
 
-
-
-
-
   async function getProvider() {
-    //return provider;
-    
     const web3Modal = new Web3Modal({});
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
-
-
     return provider;
   }
 
@@ -411,13 +376,11 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
       console.log(error);
       return false;
     }
-
-}
+  }
 
   var closedContract;
   var openedContract;
-  //const init = await initializeContracts();
- 
+
   async function unlockSingle(closedId, keyId, doorOption) {
     const connected = await initAddress();
     //const { numToMint } = mintForm;
@@ -579,8 +542,6 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   
   console.log("Building page..")
   return (
-
-    
     <div id="home" className="main justify-center items-center">
       
       <Header title="Dimension Doors NFTs"/>
@@ -864,9 +825,9 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
                 <p className="text-center text-lg font-bold text-textColor mt-2 px-6">
                     Current master provenance hash for keys + closed doors
                 </p>
-                <p className="text-center text-lg text-textColor mt-2 px-6">
-                    {masterClosedProvenance}
-                </p>
+                <div className="flex justify-center items-center pt-2">
+                  <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={10} cols={100} disabled={true} value={masterClosedProvenance}/>
+                </div>
 
                 <p className="text-center text-lg font-bold text-textColor mt-2 px-6">
                     Concatenated master hash
@@ -880,9 +841,9 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
                     Current master provenance hash for opened doors
                 </p>
 
-                <p className="text-center text-lg text-textColor mt-2 px-6">
-                    {masterOpenProvenance}
-                </p>
+                <div className="flex justify-center items-center pt-2">
+                  <textarea className="textarea bg-backgroundColor text-textColor border border-textColor px-1 py-1" rows={10} cols={100} disabled={true} value={masterOpenProvenance}/>
+                </div>
 
                 <p className="text-center text-lg font-bold text-textColor mt-2 px-6">
                   Concatenated master hash
