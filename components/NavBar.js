@@ -24,7 +24,7 @@ const NavBar = ({connectWalletFunc}) => {
                 <div className="flex items-center justify-between py-4">
 
                 <a href="#home" className="">
-                        <img src="/icon.png" className="" width={40} height={40}/>
+                        <img src="/icon.png" alt="ICON" className="" width={40} height={40}/>
                 </a>
 
                 <div className="hidden sm:flex sm:items-center justify-center ml-56">

@@ -196,9 +196,9 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFunc
             <button className="items-center justify-center flex flex-wrap mt-2 px-6 pb-6 " onClick={openImage}>
                 <ul>
                     {useVideo ? (
-                         <video src={AnimationUrl} playsInline={true} loop={true} controls={false} autoPlay={true} muted={true} className="rounded-xl items-center justify-center w-full object-center border-4 border-gray-200"></video>
+                         <video src={AnimationUrl} alt="DOOR IMAGE" playsInline={true} loop={true} controls={false} autoPlay={true} muted={true} className="rounded-xl items-center justify-center w-full object-center border-4 border-gray-200"></video>
                     ) : (
-                        <img src={image} alt="" className="rounded-xl items-center justify-center w-full object-center border-2 border-gray-200"></img>
+                        <img src={image} alt="DOOR IMAGE" className="rounded-xl items-center justify-center w-full object-center border-2 border-gray-200"></img>
                     ) }
                    
                     

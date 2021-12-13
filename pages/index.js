@@ -584,7 +584,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
         <div className="md:flex justify-center items-center space-x-16 mt-5 md:mr-0 mr-10">
           <div className="md:flex justify-center items-center pl-4 pr-4 md:pl-12 md:pr-12 xl:pl-128 xl:pr-128">
             <div className="styles_container__16cxk">
-              <video className="rounded-2xl styles_video__32uJf" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeigegnsqf7y5vyghi7xodgg5d6h636luerkgudss6lenqyve4ndpyi/S_Transition.mp4" autoPlay={true} muted={true}> </video>
+              <video className="rounded-2xl styles_video__32uJf" alt="TRANSITION" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeigegnsqf7y5vyghi7xodgg5d6h636luerkgudss6lenqyve4ndpyi/S_Transition.mp4" autoPlay={true} muted={true}> </video>
             </div>
           </div>
         </div>
@@ -599,7 +599,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
               </div>
             </div>
             <div className="max-w-lg pr-24 pb-8 md:flex justify-center items-center hidden">
-              <img className="rounded-lg" width={3570} src={introImage} alt=""/>
+              <img className="rounded-lg" alt="INTROIMAGE" width={3570} src={introImage} alt=""/>
             </div>
           </div>
         </div>
@@ -607,7 +607,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
         <div className="md:flex justify-center items-center space-x-16 mb-5 md:mr-0 mr-10">
           <div className="md:flex justify-center items-center pl-4 pr-4 md:pl-12 md:pr-12 xl:pl-128 xl:pr-128">
             <div className="styles_container__16cxk">
-              <video className="rounded-2xl styles_video__32uJf" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeiafp2swhktchn3mnxxell5pqnnd4qvztgylz5za6ohixm56m3ed5y/Example.mp4" autoPlay={true} muted={true}> </video>
+              <video className="rounded-2xl styles_video__32uJf" alt="EXAMPLE" playsInline={true} loop={true} controls={false} src="https://ipfs.io/ipfs/bafybeiafp2swhktchn3mnxxell5pqnnd4qvztgylz5za6ohixm56m3ed5y/Example.mp4" autoPlay={true} muted={true}> </video>
             </div>
           </div>
         </div>
