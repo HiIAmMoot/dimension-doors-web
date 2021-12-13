@@ -7,8 +7,8 @@ const NavBar = ({connectWalletFunc}) => {
     const [connected, setConnected] = useState(false);
 
     async function connectWallet() {
-        const provider = await connectWalletFunc();
-        setConnected(true);
+        const connected = await connectWalletFunc();
+        setConnected(connected);
         //return provider;
     }
 
@@ -37,8 +37,12 @@ const NavBar = ({connectWalletFunc}) => {
 
                 <div className="hidden sm:flex sm:items-right">
 
+                    <a href="https://etherscan.io/address/0xdf9fb9e7731dfa4a17adbb3a462e30470eb4d802#code" target="_blank" className="">
+                        <img src="/etherscan-logo.png" alt="View contract on Etherscan" className="logo-big"/>
+                    </a>
+
                     <a href="https://github.com/HiIAmMoot/dimension-doors-web" target="_blank" className="">
-                        <img src="/github.svg" alt="GITHUB" className="logo-big"/>
+                        <img src="/github.svg" alt="View github page of website" className="logo-big"/>
                     </a>
 
                     <a href="https://discord.gg/G9PZWsnzx5" target="_blank" className="">
@@ -82,6 +86,10 @@ const NavBar = ({connectWalletFunc}) => {
                         <div className=" justify-right items-right border-mainColor border-t-2 pt-2">
                         <div className="flex justify-right items-right py-2">
                         
+
+                            <a href="https://etherscan.io/address/0xdf9fb9e7731dfa4a17adbb3a462e30470eb4d802#code" target="_blank" className="">
+                               <img src="/etherscan-logo.png" alt="View contract on Etherscan" className="logo-big"/>
+                            </a>
                             <a href="https://github.com/HiIAmMoot/dimension-doors-web" target="_blank" className="">
                                 <img src="/github.svg" alt="GITHUB" className="logo-big"/>
                             </a>

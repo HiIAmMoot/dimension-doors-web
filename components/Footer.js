@@ -4,6 +4,10 @@ export default function Footer() {
     <>
       <footer className="footer">
 
+                    <a href="https://etherscan.io/address/0xdf9fb9e7731dfa4a17adbb3a462e30470eb4d802#code" target="_blank" className="">
+                        <img src="/etherscan-logo.png" alt="View contract on Etherscan" className="logo-big"/>
+                    </a>
+
                     <a href="https://github.com/HiIAmMoot/dimension-doors-web" target="_blank" className="">
                         <img src="/github.svg" alt="GITHUB" className="logo-big"/>
                     </a>

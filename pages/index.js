@@ -409,6 +409,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   //const init = await initializeContracts();
  
   async function unlockSingle(closedId, keyId, doorOption) {
+    const connected = await initAddress();
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
@@ -434,6 +435,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   }
 
   async function mintAndUnlock(closedId, keyId, doorOption) {
+    const connected = await initAddress();
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
@@ -483,6 +485,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   }
 
   async function mintBulk(tokenIds, amounts) {
+    const connected = await initAddress();
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
@@ -520,6 +523,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   
 
   async function mintSingle(tokenId, _price) {
+    const connected = await initAddress();
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
