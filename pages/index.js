@@ -1,24 +1,23 @@
+import { useState } from "react";
 import ReactTooltip from 'react-tooltip';
-import Head from 'next/head'
+
 import Header from '@components/Header'
 import Footer from '@components/Footer'
 import NavBar from '@components/NavBar'
 import ProvenanceTable from '@components/ProvenanceTable'
+import DoorPanel from '@components/DoorPanel';
 
-import { useState } from "react";
 import { ethers } from "ethers";
 import Web3Modal from "web3modal";
-//import { fetch } from "node-fetch";
+
+import { NextSeo } from 'next-seo';
 
 // Reference to deployed contract
 // NOTE: having issues? make sure you deployed your contract and make sure to
 // check the network you are on.
 import { contractAddrClosed, contractAddrOpened, etherscanKey, infuraId, infuraSecret, network } from "../config";
 import DimensionDoors from "../contracts/artifacts/DimensionDoors_metadata.json";
-
 import DimensionDoorsOpened from "../contracts/artifacts/DimensionDoorsOpened_metadata.json";
-import DoorPanel from '@components/DoorPanel';
-
 
 export const staticPageGenerationTimeout = 2;
 
@@ -572,7 +571,12 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
     
     <div id="home" className="main justify-center items-center">
-          <Header title="Dimension Doors NFTs"/>
+      
+      <Header title="Dimension Doors NFTs"/>
+      <NextSeo
+        title="Dimension Doors NFTs"
+        description="Dimension Doors is a collection of 3504 NFTs—unique digital collectibles living on the Ethereum blockchain. This collection consists of 4 keys, 500 closed doors and 3000 open doors. Each closed door can have different quantities based on its class: S, A, B or C. Respectively consisting of 1, 2, 5, 10 quantities per closed door. Once you own a closed door and key of that class, you can unlock that specific door and choose an 1/1 opened door NFT. Unlocking an open door will burn the closed door and key, and mint the open door of your choosing. Because each closed Dimension Door is hand-drawn, it will take time to finish the whole collection. That's why drops will happen in 50 batches consisting of the same ratios and quantities per class."
+      />
       <NavBar connectWalletFunc={initAddress}/>
 
       <div className="wrapper">
