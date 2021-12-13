@@ -215,7 +215,20 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
   var ownerClosedSupplies = [];
   var ownerOpenedSupplies = [];
 
-  const [bulkMintEnabled, setBulkMintEnabled] = useState(false);
+  const [bulkMintEnabled, setBulkMintEnabledInternal] = useState(false);
+
+  var navBarBulkMintFunc;
+
+  function initNavBarBulkMintFunc(navbarFunc) {
+    navBarBulkMintFunc = navbarFunc;
+  }
+
+  function setBulkMintEnabled(enabled) {
+    navBarBulkMintFunc(enabled);
+    setBulkMintEnabledInternal(enabled);
+  }
+
+
   function updateClosedPanel(arg, tokenId, price, init) {
     if (arg == "init") {
       closedUpdateFuncs[tokenId] = init;
@@ -265,9 +278,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
           if (selectedClosedTokens[tokenId] > 0) {
             selectedClosedTokens[tokenId] =  selectedClosedTokens[tokenId] - 1;
             if (selectedTokensLength == 1) {
-              console.log("test1")
               setBulkMintEnabled(false);
-              console.log("test2")
             }
             selectedTokensLength = selectedTokensLength - 1;
             selectedTokensPrice = selectedTokensPrice - price * 1000;
@@ -577,7 +588,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
         title="Dimension Doors NFTs"
         description="Dimension Doors is a collection of 3504 NFTs—unique digital collectibles living on the Ethereum blockchain. This collection consists of 4 keys, 500 closed doors and 3000 open doors. Each closed door can have different quantities based on its class: S, A, B or C. Respectively consisting of 1, 2, 5, 10 quantities per closed door. Once you own a closed door and key of that class, you can unlock that specific door and choose an 1/1 opened door NFT. Unlocking an open door will burn the closed door and key, and mint the open door of your choosing. Because each closed Dimension Door is hand-drawn, it will take time to finish the whole collection. That's why drops will happen in 50 batches consisting of the same ratios and quantities per class."
       />
-      <NavBar connectWalletFunc={initAddress}/>
+      <NavBar connectWalletFunc={initAddress} mintBulk={mintBulkButton} mintBulkInit={initNavBarBulkMintFunc}/>
 
       <div className="wrapper">
 
@@ -613,20 +624,6 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
         </div>
 
         <div id="buy" className="md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 justify-center items-center"><div className="divider-top"></div></div>
-
-
-        {bulkMintEnabled ? (        <div className="md:pl-80 md:pr-80 sm:pl-1 sm:pr-1 max-w-full  pt-8 px-6">
-                                <button className="mt-3 text-lg font-semibold bg-green-700 w-full text-white rounded-lg px-6 py-3 block shadow-xl hover:bg-gray-700"
-                                    onClick={mintBulkButton} data-tip data-for="mintBulkTip">
-                                    MINT SELECTED
-                                </button>
-
-                                <ReactTooltip id="mintBulkTip" place="top" effect="solid" type="dark" className="font-medium text-textColor bg-backgroundColor rounded-bg">
-                                    Mint the selected keys and closed doors
-                                </ReactTooltip>
-        </div>) : (<div></div>)}
-
-
 
         <div className="max-w-full mx-auto py-8 px-6">
             <h1 className="text-center text-4xl text-textColor font-medium leading-snug tracking-wider">
