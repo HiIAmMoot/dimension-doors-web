@@ -44,11 +44,12 @@ const NavBar = ({connectWalletFunc, mintBulk, mintBulkInit, _bulkMintEnabled}) =
                 </a>
 
                 <div className={"hidden sm:flex sm:items-center justify-center " + (bulkMintEnabled ? ("ml-128 mr-3") : ("ml-80"))}>
-                        <a href="#buy" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">BUY</a>
-                        <a href="#unlock" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">UNLOCK</a>
+                        <a href="#mint" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">MINT</a>
+                        <a href="#gallery" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">GALLERY</a>
                         <a href="#provenance" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">PROVENANCE</a>
                         <a href="#roadmap" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">ROADMAP</a>
                         <a href="#team" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">TEAM</a>
+
                 </div>
 
                 <div className="hidden sm:flex sm:items-right">
@@ -62,7 +63,7 @@ const NavBar = ({connectWalletFunc, mintBulk, mintBulkInit, _bulkMintEnabled}) =
                         <img src="/github.svg" alt="View github page of website" className="logo-big"/>
                     </a>
 
-                    <a href="https://discord.gg/G9PZWsnzx5" target="_blank" className="">
+                    <a href="https://discord.gg/qAEK46pESr" target="_blank" className="">
                         <img src="/discord.svg" alt="DISCORD" className="logo-big"/>
                     </a>
 
@@ -121,8 +122,8 @@ const NavBar = ({connectWalletFunc, mintBulk, mintBulkInit, _bulkMintEnabled}) =
             {expanded ? (
                 <div className="block sm:hidden backgroundColor justify-right border-mainColor border-t-2 py-2">
                     <div className="flex flex-col justify-right items-right">
-                        <a href="#buy" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">BUY</a>
-                        <a href="#unlock" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">UNLOCK</a>
+                        <a href="#mint" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">MINT</a>
+                        <a href="#gallery" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">GALLERY</a>
                         <a href="#provenance" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">PROVENANCE</a>
                         <a href="#roadmap" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">ROADMAP</a>
                         <a href="#team" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4 pb-2">TEAM</a>
@@ -137,7 +138,7 @@ const NavBar = ({connectWalletFunc, mintBulk, mintBulkInit, _bulkMintEnabled}) =
                                 <img src="/github.svg" alt="GITHUB" className="logo-big"/>
                             </a>
 
-                            <a href="https://discord.gg/G9PZWsnzx5" target="_blank" className="">
+                            <a href="https://discord.gg/qAEK46pESr" target="_blank" className="">
                                 <img src="/discord.svg" alt="DISCORD" className="logo-big"/>
                             </a>
 

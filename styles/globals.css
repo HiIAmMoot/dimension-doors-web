@@ -61,6 +61,24 @@ code {
   color: rgba(244, 230, 212, var(--tw-text-opacity));
 }
 
+.panel-darken {
+  justify-content: "center";
+}
+
+.panel-darken:after {
+  justify-content: "center";
+  background: rgba(255, 0, 0, 1);
+  opacity: 0;
+}
+
+.panel-darken:hover:after {
+  opacity: .5;
+}
+
+.align-top {
+  vertical-align: "top";
+}
+
 .wrapper {
   width: "50%";
   margin-Top: "auto";
@@ -111,6 +129,17 @@ code {
   height: 1.5em;
   margin: 5px;
 }
+
+.logo-big2 {
+  height: 2em;
+  margin: 5px;  
+}
+
+.logo-bigger {
+  height: 2.5em;
+  margin: 5px;
+}
+
 .divider-top {
   width: 100%;
   height: 50;
