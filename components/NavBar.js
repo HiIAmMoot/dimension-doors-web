@@ -49,6 +49,7 @@ const NavBar = ({connectWalletFunc, mintBulk, mintBulkInit, _bulkMintEnabled}) =
                         <a href="#provenance" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">PROVENANCE</a>
                         <a href="#roadmap" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">ROADMAP</a>
                         <a href="#team" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">TEAM</a>
+                        <a href="#termsconditions" className="text-mainColor text-sm font-semibold hover:text-purple-600 mr-4">{"TERMS & CONDITIONS"}</a>
 
                 </div>
 
@@ -126,7 +127,8 @@ const NavBar = ({connectWalletFunc, mintBulk, mintBulkInit, _bulkMintEnabled}) =
                         <a href="#gallery" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">GALLERY</a>
                         <a href="#provenance" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">PROVENANCE</a>
                         <a href="#roadmap" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">ROADMAP</a>
-                        <a href="#team" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4 pb-2">TEAM</a>
+                        <a href="#team" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4">TEAM</a>
+                        <a href="#termsconditions" className="text-mainColor text-right text-lg font-semibold hover:text-purple-600 mr-4 pb-2">{"TERMS & CONDITIONS"}</a>
                         <div className=" justify-right items-right border-mainColor border-t-2 pt-2">
                         <div className="flex justify-right items-right py-2">
                         

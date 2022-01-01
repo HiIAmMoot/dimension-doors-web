@@ -6,6 +6,7 @@ import Footer from '@components/Footer'
 import NavBar from '@components/NavBar'
 import ProvenanceTable from '@components/ProvenanceTable'
 import DoorPanel from '@components/DoorPanel';
+import TermsConditions from "@components/TermsConditions";
 
 import { ethers } from "ethers";
 import Web3Modal from "web3modal";
@@ -1494,6 +1495,9 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
           </div>
       </div>
 
+      <div id="termsconditions" className="px-1 justify-center items-center"><div className="divider-top"></div></div>
+
+      <TermsConditions/>
 
       <Footer/>
     </div>
