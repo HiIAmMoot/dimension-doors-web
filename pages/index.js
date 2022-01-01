@@ -1430,7 +1430,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
 
       <div id="roadmap" className="px-1 justify-center items-center"><div className="divider-top"></div></div>
 
-      <div className="md:flex space-x-16 mt-5 justify-center">
+      <div className="md:flex space-x-16 mt-5 justify-center pb-6">
           <div className="md:flex items-center">
             <div>
               <h1 className="text-5xl text-textColor font-medium leading-snug tracking-wider text-center">ROADMAP</h1>
