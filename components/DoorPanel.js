@@ -313,7 +313,7 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFunc
  
                         <div className="flex items-center">
                             <button className="flex mx-1 mb-5 mr-2 text-lg font-semibold bg-gray-400 w-full text-white rounded-lg p-2 justify-center items-center shadow-xl hover:bg-gray-700"
-                            data-tip data-for="openseaTip">
+                            onClick={viewOS} data-tip data-for="openseaTip">
                                     <img src="/opensea.svg" alt="OPENSEA" className="logo-big2"/>
                             </button>
 
@@ -397,7 +397,7 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFunc
                         
                             <div className="flex items-center">
                                 <button className="flex mx-1 mt-3 mb-5 mr-2 text-lg font-semibold bg-gray-400 w-full text-white p-4 justify-center items-center rounded-lg shadow-xl hover:bg-gray-700"
-                                 data-tip data-for="openseaTip">
+                                 onClick={viewOS} data-tip data-for="openseaTip">
                                     <img src="/opensea.svg" alt="OPENSEA" className="logo-bigger"/>
                                 </button>
 
