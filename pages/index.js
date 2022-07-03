@@ -61,7 +61,7 @@ export async function getStaticProps(context) {
       return res.json();
     })
     .then((jsonData) => {
-      //console.log(jsonData);
+      console.log(jsonData);
       //console.log(status);
       return jsonData;
     })
@@ -73,8 +73,9 @@ export async function getStaticProps(context) {
   }
 
   async function buildClosedMeta(){
-    //console.log('Start')
+    console.log('Start')
     var meta = await getClosedMetadata("combined");
+    //console.log(meta);
     return meta.meta;
   }
 
