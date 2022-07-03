@@ -61,7 +61,7 @@ export async function getStaticProps(context) {
       return res.json();
     })
     .then((jsonData) => {
-      console.log(jsonData);
+      //console.log(jsonData);
       //console.log(status);
       return jsonData;
     })
@@ -73,7 +73,7 @@ export async function getStaticProps(context) {
   }
 
   async function buildClosedMeta(){
-    console.log('Start')
+    //console.log('Start')
     var meta = await getClosedMetadata("combined");
     //console.log(meta);
     return meta.meta;
@@ -505,7 +505,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
       console.log("randomOpen: ", randomOpen);
       const matches = (element) => element == tokenId;
       console.log("swapping:", tokenId)
-      const index = randomOpen.findIndex(matches);
+      var index = randomOpen.findIndex(matches);
       console.log("found index:", index);
       
       if (index == -1) {
@@ -723,7 +723,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
-    if (name !== "homestead") {
+    if (name !== "rinkeby") {
       setErrorMsg(`You are on the wrong network: ${name}`);
       return 0;
     }
