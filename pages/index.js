@@ -238,7 +238,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
       randomOpen.push(initialRandomOpenPanel[0]);
     }
 
-    console.log(randomOpen);
+    //console.log(randomOpen);
     setRandomOpenTest(randomOpen);
     newPanels.length = randomOpen.length;
 
@@ -610,7 +610,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
-    if (name !== "homestead") {
+    if (name !== "rinkeby") {
       setErrorMsg(`You are on the wrong network: ${name}`);
       return 0;
     }
@@ -636,7 +636,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
-    if (name !== "homestead") {
+    if (name !== "rinkeby") {
       setErrorMsg(`You are on the wrong network: ${name}`);
       return 0;
     }
@@ -686,7 +686,7 @@ export default function Home({closedMeta, openMeta, currentBatch, currentClosedS
     //const { numToMint } = mintForm;
     const provider = await getProvider();
     const { name } = await provider.getNetwork();
-    if (name !== "homestead") {
+    if (name !== "rinkeby") {
       setErrorMsg(`You are on the wrong network: ${name}`);
       return 0;
     }
