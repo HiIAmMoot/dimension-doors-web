@@ -124,7 +124,7 @@ const DoorPanel = ({_prices, _connectedAddress, _owned, _updateFunc, _updateFunc
     }
 
     function viewOS() {
-        var url = "https://opensea.io/assets/";
+        var url = "https://testnets.opensea.io/assets/";
         if (opened) {
             url = url + contractAddrOpened + "/" + tokenId.toString();
         }
